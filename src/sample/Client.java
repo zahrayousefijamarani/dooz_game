@@ -37,12 +37,13 @@ class ThreadForGetFromClient extends Thread {
             if (Client.endOfClient) {
                 return;
             }
-            if (scannerInput.hasNextLine()) {
-                //Client.scoreOn =false;
-                lineOfOrder = scannerInput.nextLine();
-                formatter.format("%s\n", lineOfOrder);//todo
-                formatter.flush();
-            }
+            if (!Client.gameStart)
+                if (scannerInput.hasNextLine()) {
+                    //Client.scoreOn =false;
+                    lineOfOrder = scannerInput.nextLine();
+                    formatter.format("%s\n", lineOfOrder);//todo
+                    formatter.flush();
+                }
         }
     }
 
@@ -71,7 +72,7 @@ class ThreadForGetInputFromServer extends Thread {
 //                    System.out.println("size:"+Client.serialInputFromServer.size());
                     if (getJson) {
                         synchronized (Client.lock) {
-                            counterForUpdate ++;
+                            counterForUpdate++;
                             Client.setUpdateTable(true);
                         }
                         System.out.println("hi");
@@ -85,7 +86,7 @@ class ThreadForGetInputFromServer extends Thread {
                         continue;
                     }
 
-                    if(counterForUpdate == 1){
+                    if (counterForUpdate == 1) {
                         synchronized (Client.lockForStartGame) {
                             Client.setGameStart(true);
                         }
@@ -137,10 +138,11 @@ public class Client extends Application {
     private static Scanner scannerInput = new Scanner(System.in);
     private static boolean updateTable = false;
     static Table table;
-    private int scale = 40;
-    private static boolean gameStart = false;
+    private int scale = 50;
+    public static boolean gameStart = false;
     private Group menuRoot = new Group();
     private static Cell[][] cells;
+    static Formatter formatter;
 
     static void setGameStart(boolean gameStart) {
         synchronized (lockForStartGame) {
@@ -369,10 +371,10 @@ public class Client extends Application {
 //        primaryStage.show();
 //    }
 
-    private static void updateTableF(){
-        for(int i=0;i<table.getN();i++){
-            for (int j=0;j<table.getM();j++){
-                cells[i][j].setText(table.gameTable[i][2*j]+"");
+    private static void updateTableF() {
+        for (int i = 0; i < table.getN(); i++) {
+            for (int j = 0; j < table.getM(); j++) {
+                cells[i][j].setText(table.gameTable[i][2 * j] + "");
             }
         }
 
@@ -387,9 +389,44 @@ public class Client extends Application {
 
         for (int i = 0; i < table.getN(); i++) {
             for (int j = 0; j < table.getM(); j++) {
-                cells[i][j] = new Cell((3 + scale) * i + 3, (3 + scale) * j + 3, tables[i][2*j], menuRoot,scale);
+                cells[i][j] = new Cell((3 + scale) * i + 3, (3 + scale) * j + 3, tables[i][2 * j], menuRoot, scale);
             }
         }
+
+        GridPane grid = new GridPane();
+        final Label label = new Label();
+        GridPane.setConstraints(label, 0, 3);
+        GridPane.setColumnSpan(label, 2);
+        grid.getChildren().add(label);
+        grid.setPadding(new Insets(10, 10, 10, 10));
+        grid.setVgap(5);
+        grid.setHgap(5);
+        grid.relocate(300, 300);
+//Defining the Name text field
+        final TextField name = new TextField();
+        name.setPromptText("Enter command");
+        name.setPrefColumnCount(10);
+        GridPane.setConstraints(name, 0, 0);
+        grid.getChildren().add(name);
+
+        menuRoot.getChildren().add(grid);
+        Button submit = new Button("ENTER");
+        GridPane.setConstraints(submit, 1, 0);
+        grid.getChildren().add(submit);
+        submit.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                if (name.getText().trim().equals("")) {
+                    label.setText("You have not enter username");
+                } else {
+                    formatter.format("%s\n", name.getText());
+                    formatter.flush();
+                    grid.getChildren().remove(label);
+                }
+
+            }
+        });
+
 
         primaryStage.setScene(menuScene);
         primaryStage.show();
@@ -402,12 +439,11 @@ public class Client extends Application {
     }
 
     public static void main(String[] args) {
-
         try {
 
             Socket socket = new Socket("127.0.0.1", 8888);
             OutputStream outputStream = socket.getOutputStream();
-            Formatter formatter = new Formatter(outputStream);
+            formatter = new Formatter(outputStream);
             InputStream inputStream = socket.getInputStream();
             Scanner scanner = new Scanner(inputStream);
             String userName;
