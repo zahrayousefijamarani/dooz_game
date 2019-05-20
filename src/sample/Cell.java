@@ -1,0 +1,32 @@
+package sample;
+
+import javafx.scene.Group;
+import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Text;
+import javafx.scene.paint.Color;
+
+
+public class Cell {
+    private Rectangle rectangle;
+    private Text text;
+
+    public Cell(int x, int y, char a, Group root,int scale){
+        rectangle = new Rectangle();
+        rectangle.setHeight(scale);
+        rectangle.setWidth(scale);
+        rectangle.relocate(x,y);
+        rectangle.setFill(Color.rgb(40, 92, 247));
+        text = new Text(a+"");
+        root.getChildren().add(rectangle);
+        root.getChildren().add(text);
+
+    }
+
+    public String getTextChar() {
+        return text.getText();
+    }
+
+    public void setText(String text){
+        this.text.setText(text);
+    }
+}
