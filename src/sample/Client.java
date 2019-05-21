@@ -3,6 +3,7 @@ package sample;
 
 import com.google.gson.Gson;
 import dooz.Table;
+import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -14,6 +15,8 @@ import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 import java.io.*;
@@ -57,9 +60,9 @@ class ThreadForGetInputFromServer extends Thread {
     }
 
     public void run() {
-        int counterForUpdate = 0;
         boolean getJson = false;
         String serverAnswer;
+        Client.counterForUpdate = 0;
         try {
             while (true) {
                 if (scanner.hasNextLine()) {
@@ -72,10 +75,9 @@ class ThreadForGetInputFromServer extends Thread {
 //                    System.out.println("size:"+Client.serialInputFromServer.size());
                     if (getJson) {
                         synchronized (Client.lock) {
-                            counterForUpdate++;
+                            Client.counterForUpdate++;
                             Client.setUpdateTable(true);
                         }
-                        System.out.println("hi");
                         Gson gson = new Gson();
                         Client.table = gson.fromJson(serverAnswer, Table.class);
                         getJson = false;
@@ -86,7 +88,7 @@ class ThreadForGetInputFromServer extends Thread {
                         continue;
                     }
 
-                    if (counterForUpdate == 1) {
+                    if (Client.counterForUpdate == 1) {
                         synchronized (Client.lockForStartGame) {
                             Client.setGameStart(true);
                         }
@@ -94,9 +96,12 @@ class ThreadForGetInputFromServer extends Thread {
 
                     if (serverAnswer.contains("end game")) {
                         synchronized (Client.lockForStartGame) {
-                            counterForUpdate = 0;
+                            Client.counterForUpdate = 0;
                             Client.setGameStart(false);
+                            Client.setUpdateTable(false);
+                            Client.yourStage.close();
                         }
+
                     }
 
                     System.out.println(serverAnswer);
@@ -138,11 +143,14 @@ public class Client extends Application {
     private static Scanner scannerInput = new Scanner(System.in);
     private static boolean updateTable = false;
     static Table table;
-    private int scale = 50;
-    public static boolean gameStart = false;
+    private int scale = 100;
+    static boolean gameStart = false;
     private Group menuRoot = new Group();
     private static Cell[][] cells;
-    static Formatter formatter;
+    private static Formatter formatter;
+    static int counterForUpdate = 0;
+    static Stage yourStage;
+    private static String userName;
 
     static void setGameStart(boolean gameStart) {
         synchronized (lockForStartGame) {
@@ -381,7 +389,7 @@ public class Client extends Application {
     }
 
     public void start(Stage primaryStage) {
-
+        yourStage = primaryStage;
         Scene menuScene = new Scene(menuRoot, 800, 800, Color.rgb(77, 255, 255));
 
         char[][] tables = table.gameTable;
@@ -393,6 +401,13 @@ public class Client extends Application {
             }
         }
 
+        Text text = new Text(userName);
+        text.relocate(300, 700);
+        text.setFont(Font.font(50));
+        text.setFill(Color.BLACK);
+        text.setUnderline(true);
+        menuRoot.getChildren().add(text);
+
         GridPane grid = new GridPane();
         final Label label = new Label();
         GridPane.setConstraints(label, 0, 3);
@@ -401,7 +416,7 @@ public class Client extends Application {
         grid.setPadding(new Insets(10, 10, 10, 10));
         grid.setVgap(5);
         grid.setHgap(5);
-        grid.relocate(300, 300);
+        grid.relocate(100, 700);
 //Defining the Name text field
         final TextField name = new TextField();
         name.setPromptText("Enter command");
@@ -413,20 +428,25 @@ public class Client extends Application {
         Button submit = new Button("ENTER");
         GridPane.setConstraints(submit, 1, 0);
         grid.getChildren().add(submit);
-        submit.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                if (name.getText().trim().equals("")) {
-                    label.setText("You have not enter username");
-                } else {
-                    formatter.format("%s\n", name.getText());
-                    formatter.flush();
-                    grid.getChildren().remove(label);
-                }
-
+        submit.setOnAction(event -> {
+            if (name.getText().trim().equals("")) {
+                label.setText("You have not enter username");
+            } else {
+                formatter.format("%s\n", name.getText());
+                formatter.flush();
+                grid.getChildren().remove(label);
             }
-        });
 
+        });
+        AnimationTimer animationTimer = new AnimationTimer() {
+            @Override
+            public void handle(long now) {
+                if (Client.counterForUpdate != 0) {
+                    updateTableF();
+                }
+            }
+        };
+        animationTimer.start();
 
         primaryStage.setScene(menuScene);
         primaryStage.show();
@@ -446,7 +466,6 @@ public class Client extends Application {
             formatter = new Formatter(outputStream);
             InputStream inputStream = socket.getInputStream();
             Scanner scanner = new Scanner(inputStream);
-            String userName;
 
 
             //for make username
@@ -476,12 +495,12 @@ public class Client extends Application {
                 }
             }
 
+
             do {
                 synchronized (lock) {
                     if (updateTable) {
                         //launch(args);
-                        updateTableF();
-                        System.out.println("here");
+                        //updateTableF();
                         updateTable = false;
                     }
                 }

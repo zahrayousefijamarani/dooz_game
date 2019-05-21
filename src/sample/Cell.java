@@ -2,6 +2,7 @@ package sample;
 
 import javafx.scene.Group;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.paint.Color;
 
@@ -17,6 +18,9 @@ public class Cell {
         rectangle.relocate(x,y);
         rectangle.setFill(Color.rgb(40, 92, 247));
         text = new Text(a+"");
+        text.setFill(Color.RED);
+        text.setFont(Font.font(50));
+        text.relocate(x+20,y);
         root.getChildren().add(rectangle);
         root.getChildren().add(text);
 
