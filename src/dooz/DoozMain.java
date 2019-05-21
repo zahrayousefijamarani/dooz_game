@@ -33,7 +33,7 @@ public class DoozMain {
                 }
                 break;
             }
-            case "resume"://todo ooooooooo
+            case "resume":
                 if (lineOfOrder.trim().equals("back"))
                     state = "menu";
                 else if (lineOfOrder.trim().matches("\\d+")) {

@@ -119,20 +119,19 @@ class ThreadForClient extends Thread {
                             game = menu.newGame(me, opponentPlayer);
                             players[0].getMenu().setGame(game);
                             players[1].getMenu().setGame(game);// todo make null the game
-
+                            menu.getGame().setPlayerForOneGame(players);
                         } else {
                             formatter.format("%s\n", "can not play");
                             formatter.flush();
                             me.setState("menu");
                         }
-                        menu.getGame().setPlayerForOneGame(players);
+
                     }
                 }
             }
 
 
         } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 }

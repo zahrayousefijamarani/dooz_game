@@ -69,30 +69,38 @@ class ThreadForGetInputFromServer extends Thread {
                     serverAnswer = scanner.nextLine();
                     if (serverAnswer == null)
                         continue;
+
+
 //                    if (Client.getScoreOn()) {
 //                        Client.serialInputFromServer.add(serverAnswer);
 //                    }
 //                    System.out.println("size:"+Client.serialInputFromServer.size());
                     if (getJson) {
-                        synchronized (Client.lock) {
+                        synchronized (Client.lockForCounter) {
                             Client.counterForUpdate++;
+                        }
+                        synchronized (Client.lock) {
                             Client.setUpdateTable(true);
                         }
                         Gson gson = new Gson();
                         Client.table = gson.fromJson(serverAnswer, Table.class);
                         getJson = false;
+                        synchronized (Client.lockForStartGame) {
+                            Client.setGameStart(true);
+                        }
                         continue;
+
                     }
                     if (serverAnswer.equals("json")) {
                         getJson = true;
                         continue;
                     }
+//                        synchronized (Client.lockForCounter) {
+//                    if (Client.counterForUpdate == 1) {
+//
+//                    }
+//                    // }
 
-                    if (Client.counterForUpdate == 1) {
-                        synchronized (Client.lockForStartGame) {
-                            Client.setGameStart(true);
-                        }
-                    }
 
                     if (serverAnswer.contains("end game")) {
                         synchronized (Client.lockForStartGame) {
@@ -139,6 +147,7 @@ class ThreadForGetInputFromServer extends Thread {
 public class Client extends Application {
     static final Object lock = new Object();
     static final Object lockForStartGame = new Object();
+    static final Object lockForCounter = new Object();
     static boolean endOfClient = false;
     private static Scanner scannerInput = new Scanner(System.in);
     private static boolean updateTable = false;
@@ -402,7 +411,7 @@ public class Client extends Application {
         }
 
         Text text = new Text(userName);
-        text.relocate(300, 700);
+        text.relocate(350, 710);
         text.setFont(Font.font(50));
         text.setFill(Color.BLACK);
         text.setUnderline(true);
@@ -441,8 +450,11 @@ public class Client extends Application {
         AnimationTimer animationTimer = new AnimationTimer() {
             @Override
             public void handle(long now) {
-                if (Client.counterForUpdate != 0) {
-                    updateTableF();
+                synchronized (lock) {
+                    if (Client.counterForUpdate != 0) {
+                        updateTableF();
+                        Client.setUpdateTable(false);
+                    }
                 }
             }
         };
@@ -496,15 +508,15 @@ public class Client extends Application {
             }
 
 
-            do {
-                synchronized (lock) {
-                    if (updateTable) {
-                        //launch(args);
-                        //updateTableF();
-                        updateTable = false;
-                    }
-                }
-            } while (!endOfClient);
+//            do {
+//                synchronized (lock) {
+//                    if (updateTable) {
+//                        //launch(args);
+//                        //updateTableF();
+//                        updateTable = false;
+//                    }
+//                }
+//            } while (!endOfClient);
 
         }
 
