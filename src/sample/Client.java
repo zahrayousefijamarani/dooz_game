@@ -85,9 +85,10 @@ class ThreadForGetInputFromServer extends Thread {
                         Gson gson = new Gson();
                         Client.table = gson.fromJson(serverAnswer, Table.class);
                         getJson = false;
-                        synchronized (Client.lockForStartGame) {
-                            Client.setGameStart(true);
-                        }
+                        if (Client.counterForUpdate == 1)
+                            synchronized (Client.lockForStartGame) {
+                                Client.setGameStart(true);
+                            }
                         continue;
 
                     }
@@ -107,7 +108,6 @@ class ThreadForGetInputFromServer extends Thread {
                             Client.counterForUpdate = 0;
                             Client.setGameStart(false);
                             Client.setUpdateTable(false);
-                            Client.yourStage.close();
                         }
 
                     }
@@ -139,7 +139,7 @@ class ThreadForGetInputFromServer extends Thread {
             }
 
         } catch (Exception e) {
-
+            e.printStackTrace();
         }
     }
 }
@@ -447,15 +447,53 @@ public class Client extends Application {
             }
 
         });
+        Button stopButton = new Button("STOP");
+        stopButton.setPrefSize(100, 30);
+        stopButton.setTextFill(Color.PINK);
+        menuRoot.getChildren().add(stopButton);
+        stopButton.relocate(670, 610);
+        stopButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                primaryStage.close();
+                formatter.format("%s\n","stop");
+                formatter.flush();
+            }
+        });
+
+        Button undoButton = new Button("UNDO");
+        undoButton.setPrefSize(100, 30);
+        undoButton.setTextFill(Color.PINK);
+        menuRoot.getChildren().add(undoButton);
+        undoButton.relocate(670, 670);
+        undoButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                formatter.format("%s\n","undo");
+                formatter.flush();
+            }
+        });
+
+        Button pauseButton = new Button("PAUSE");
+        pauseButton.setPrefSize(100, 30);
+        pauseButton.setTextFill(Color.PINK);
+        menuRoot.getChildren().add(pauseButton);
+        pauseButton.relocate(670, 730);
+        pauseButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                primaryStage.close();
+                formatter.format("%s\n","pause");
+                formatter.flush();
+            }
+        });
+
+
         AnimationTimer animationTimer = new AnimationTimer() {
             @Override
             public void handle(long now) {
-                synchronized (lock) {
-                    if (Client.counterForUpdate != 0) {
-                        updateTableF();
-                        Client.setUpdateTable(false);
-                    }
-                }
+                updateTableF();
+                Client.setUpdateTable(false);
             }
         };
         animationTimer.start();

@@ -300,30 +300,30 @@ public class Game {
     }
 
     public void showTheGame() {
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < 2 * m - 1; j++) {
-                playerForOneGame[0].getServerFormatter().format("%s",table.gameTable[i][j]);
-                playerForOneGame[1].getServerFormatter().format("%s",table.gameTable[i][j]);
-            }
-            playerForOneGame[0].getServerFormatter().format("%s","\n");
-            playerForOneGame[1].getServerFormatter().format("%s","\n");
-        }
+//        for (int i = 0; i < n; i++) {
+//            for (int j = 0; j < 2 * m - 1; j++) {
+//                playerForOneGame[0].getServerFormatter().format("%s",table.gameTable[i][j]);
+//                playerForOneGame[1].getServerFormatter().format("%s",table.gameTable[i][j]);
+//            }
+//            playerForOneGame[0].getServerFormatter().format("%s","\n");
+//            playerForOneGame[1].getServerFormatter().format("%s","\n");
+//        }
 
         Gson gson = new Gson();
         String json = gson.toJson(table);
         playerForOneGame[0].getServerFormatter().format("json\n%s\n",json);
         playerForOneGame[1].getServerFormatter().format("json\n%s\n",json);
 
-        if (turn == 1) {
-            playerForOneGame[0].getServerFormatter().format("%s\n",playerForOneGame[0].name);
-            playerForOneGame[1].getServerFormatter().format("%s\n",playerForOneGame[0].name);
-            playerForOneGame[0].getServerFormatter().format("%s\n","is your turn");
-        }
-        if (turn == 2) {
-            playerForOneGame[0].getServerFormatter().format("%s\n",playerForOneGame[1].name);
-            playerForOneGame[1].getServerFormatter().format("%s\n",playerForOneGame[1].name);
-            playerForOneGame[1].getServerFormatter().format("%s\n","is your turn");
-        }
+//        if (turn == 1) {
+//            playerForOneGame[0].getServerFormatter().format("%s\n",playerForOneGame[0].name);
+//            playerForOneGame[1].getServerFormatter().format("%s\n",playerForOneGame[0].name);
+//            playerForOneGame[0].getServerFormatter().format("%s\n","is your turn");
+//        }
+//        if (turn == 2) {
+//            playerForOneGame[0].getServerFormatter().format("%s\n",playerForOneGame[1].name);
+//            playerForOneGame[1].getServerFormatter().format("%s\n",playerForOneGame[1].name);
+//            playerForOneGame[1].getServerFormatter().format("%s\n","is your turn");
+//        }
 
 
         playerForOneGame[0].getServerFormatter().flush();

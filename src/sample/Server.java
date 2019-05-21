@@ -44,7 +44,7 @@ class ThreadForClient extends Thread {
             //get username and make player
             do {
                 line = reader.readLine();
-            } while (line == null || menu.haveThePlayer(line) != null);
+            } while (line == null || Menu.haveThePlayer(line) != null);
             formatter.format("%s accepted\n", line);
             formatter.flush();
             me = Player.makeNewPlayer(line);
@@ -118,7 +118,7 @@ class ThreadForClient extends Thread {
                             me.setState("game");
                             game = menu.newGame(me, opponentPlayer);
                             players[0].getMenu().setGame(game);
-                            players[1].getMenu().setGame(game);// todo make null the game
+                            players[1].getMenu().setGame(game);// todo make the game null
                             menu.getGame().setPlayerForOneGame(players);
                         } else {
                             formatter.format("%s\n", "can not play");
