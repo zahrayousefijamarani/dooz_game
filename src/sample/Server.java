@@ -44,7 +44,12 @@ class ThreadForClient extends Thread {
             //get username and make player
             do {
                 line = reader.readLine();
-            } while (line == null || Menu.haveThePlayer(line) != null);
+                if(Menu.haveThePlayer((line))!=null){
+                    formatter.format("%s\n","no");
+                    formatter.flush();
+                    line = null;
+                }
+            } while (line == null);
             formatter.format("%s accepted\n", line);
             formatter.flush();
             me = Player.makeNewPlayer(line);

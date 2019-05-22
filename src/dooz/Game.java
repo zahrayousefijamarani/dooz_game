@@ -1,7 +1,6 @@
 package dooz;
 
 import com.google.gson.Gson;
-import sample.Land;
 
 import java.util.Formatter;
 
@@ -14,7 +13,6 @@ public class Game {
     private int[] lastMoveOfSecond = new int[2];
     private boolean undoForPlayer1 = false, undoForPlayer2 = false;
     private Formatter formatter ;
-   // private Land land;
 
     public int getTurn() {
         return turn;
@@ -40,7 +38,7 @@ public class Game {
         table = new Table(m, n);
     }
 
-    public boolean fullTable() {
+    private boolean fullTable() {
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < 2 * m - 1; j++)
                 if (table.gameTable[i][j] == '_')
@@ -49,7 +47,7 @@ public class Game {
         return true;
     }
 
-    public char checkEachRow(int a, int b, int k) {
+    private char checkEachRow(int a, int b, int k) {
         boolean win = false;
         char checker = table.gameTable[a][b];
         if (checker == '_')
@@ -73,7 +71,7 @@ public class Game {
 
     }
 
-    public char checkEachColumn(int a, int b, int k) {
+    private char checkEachColumn(int a, int b, int k) {
         boolean win = false;
         char checker = table.gameTable[a][b];
         if (checker == '_')
@@ -96,7 +94,7 @@ public class Game {
             return 'N';
     }
 
-    public char checkEachDia(int a, int b, int k) {
+    private char checkEachDia(int a, int b, int k) {
         boolean win = true;
         char checker;
         int i = a, j = b, counter = 0;
@@ -118,7 +116,7 @@ public class Game {
             return 'N';
     }
 
-    public char checkEachDiaLeft(int a, int b, int k) {
+    private char checkEachDiaLeft(int a, int b, int k) {
         boolean win = true;
         char checker;
         int i = a, j = b, counter = 0;
@@ -140,7 +138,7 @@ public class Game {
             return 'N';
     }
 
-    public char checkRow() {
+    private char checkRow() {
         int k = 3;
         char output = 'N';
         if (m > 3 && n > 3)
@@ -153,7 +151,7 @@ public class Game {
         return output;
     }
 
-    public char checkColumn() {
+    private char checkColumn() {
         int k = 3;
         char output = 'N';
         if (m > 3 && n > 3)
@@ -166,7 +164,7 @@ public class Game {
         return 'N';
     }
 
-    public char checkDia() {
+    private char checkDia() {
         int k = 3;
         char output = 'N';
         if (m > 3 && n > 3)
@@ -300,38 +298,30 @@ public class Game {
     }
 
     public void showTheGame() {
-//        for (int i = 0; i < n; i++) {
-//            for (int j = 0; j < 2 * m - 1; j++) {
-//                playerForOneGame[0].getServerFormatter().format("%s",table.gameTable[i][j]);
-//                playerForOneGame[1].getServerFormatter().format("%s",table.gameTable[i][j]);
-//            }
-//            playerForOneGame[0].getServerFormatter().format("%s","\n");
-//            playerForOneGame[1].getServerFormatter().format("%s","\n");
-//        }
-
         Gson gson = new Gson();
         String json = gson.toJson(table);
         playerForOneGame[0].getServerFormatter().format("json\n%s\n",json);
         playerForOneGame[1].getServerFormatter().format("json\n%s\n",json);
+        playerForOneGame[0].getServerFormatter().flush();
+        playerForOneGame[1].getServerFormatter().flush();
 
-//        if (turn == 1) {
-//            playerForOneGame[0].getServerFormatter().format("%s\n",playerForOneGame[0].name);
-//            playerForOneGame[1].getServerFormatter().format("%s\n",playerForOneGame[0].name);
-//            playerForOneGame[0].getServerFormatter().format("%s\n","is your turn");
-//        }
-//        if (turn == 2) {
-//            playerForOneGame[0].getServerFormatter().format("%s\n",playerForOneGame[1].name);
-//            playerForOneGame[1].getServerFormatter().format("%s\n",playerForOneGame[1].name);
-//            playerForOneGame[1].getServerFormatter().format("%s\n","is your turn");
-//        }
-
+        if (turn == 1) {
+            playerForOneGame[0].getServerFormatter().format("%s\n",playerForOneGame[0].name);
+            playerForOneGame[1].getServerFormatter().format("%s\n",playerForOneGame[0].name);
+            playerForOneGame[0].getServerFormatter().format("%s\n","is your turn");
+        }
+        if (turn == 2) {
+            playerForOneGame[0].getServerFormatter().format("%s\n",playerForOneGame[1].name);
+            playerForOneGame[1].getServerFormatter().format("%s\n",playerForOneGame[1].name);
+            playerForOneGame[1].getServerFormatter().format("%s\n","is your turn");
+        }
 
         playerForOneGame[0].getServerFormatter().flush();
         playerForOneGame[1].getServerFormatter().flush();
     }
 
 
-    public boolean checkHasOneBead() {
+    private boolean checkHasOneBead() {
         int counter = 0;
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < 2 * m - 1; j += 2) {
@@ -340,13 +330,10 @@ public class Game {
                 }
             }
         }
-        if (counter == m * n - 1)
-            return true;
-        else
-            return false;
+        return counter == m * n - 1;
     }
 
-    public void undo() {
+    void undo() {
         if ((turn == 1 && undoForPlayer2) || (turn == 2 && undoForPlayer1)) {//had undo
             formatter.format("%s\n","Invalid undo");
             formatter.flush();

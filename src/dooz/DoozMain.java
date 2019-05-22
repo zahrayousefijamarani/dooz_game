@@ -46,14 +46,6 @@ public class DoozMain {
                 break;
             case "menu":
                 if (newGameMatcher.find()) {
-//                    if (newGameMatcher.group(1) == null){//less than two players
-//                        formatter.format("%s\n","Invalid players");
-//                    } else {
-//                        opponentPlayer =menuOfTheGame.haveThePlayer( newGameMatcher.group(1));
-//                        if(opponentPlayer != null) {
-//                            state = "game";
-//                            menuOfTheGame.newGame(me, opponentPlayer);
-//                        }
                    }
                 else if (lineOfOrder.equals("resume")) {
                     menuOfTheGame.resume(me);
