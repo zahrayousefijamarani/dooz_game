@@ -1,5 +1,6 @@
 package dooz;
 
+import com.google.gson.Gson;
 import sample.Server;
 
 import java.util.ArrayList;
@@ -71,10 +72,14 @@ public class Menu {
     }
 
     public void scoreBoard() {
+        ArrayList<String> outPut=new ArrayList<>();
         sortPlayers();
         for (Player player : players) {
-            formatter.format("%s\n",player.name + " " + player.won + " " + player.loss + " " + player.draw);
+           outPut.add (player.name + " " + player.won + " " + player.loss + " " + player.draw+"\n");
         }
+        Gson gson = new Gson();
+        String json = gson.toJson(outPut);
+        formatter.format("%s\n",json);
         formatter.flush();
 
     }

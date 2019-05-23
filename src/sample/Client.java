@@ -2,6 +2,7 @@ package sample;
 
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import dooz.Table;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
@@ -11,6 +12,9 @@ import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -22,102 +26,6 @@ import java.net.Socket;
 import java.util.*;
 
 
-class ThreadForGetFromClient extends Thread {
-    private Scanner scannerInput;
-    private Formatter formatter;
-
-    ThreadForGetFromClient(Scanner scannerInput, Formatter formatter) {
-        this.scannerInput = scannerInput;
-        this.formatter = formatter;
-    }
-
-    public void run() {
-        String lineOfOrder;
-        while (true) {
-            if (Client.endOfClient) {
-                return;
-            }
-            if (!Client.gameStart)
-                if (scannerInput.hasNextLine()) {
-                    //Client.scoreOn =false;
-                    lineOfOrder = scannerInput.nextLine();
-                    formatter.format("%s\n", lineOfOrder);//todo
-                    formatter.flush();
-                }
-        }
-    }
-
-}
-
-class ThreadForGetInputFromServer extends Thread {
-    private Scanner scanner;
-
-    ThreadForGetInputFromServer(Scanner scanner) {
-        this.scanner = scanner;
-    }
-
-    public void run() {
-        boolean getJson = false;
-        String serverAnswer;
-        Client.counterForUpdate = 0;
-        try {
-            while (true) {
-                if (scanner.hasNextLine()) {
-                    serverAnswer = scanner.nextLine();
-                    if (serverAnswer == null)
-                        continue;
-
-                    if (serverAnswer.equals("start a game")) {
-                        Client.endGame = false;
-                    }
-
-                    if (getJson) {
-                        synchronized (Client.lockForCounter) {
-                            Client.counterForUpdate++;
-                        }
-                        synchronized (Client.lock) {
-                            Client.setUpdateTable(true);
-                        }
-                        Gson gson = new Gson();
-                        Client.table = gson.fromJson(serverAnswer, Table.class);
-                        getJson = false;
-                        if (Client.counterForUpdate == 1)
-                            synchronized (Client.lockForStartGame) {
-                                Client.setGameStart(true);
-                            }
-                        continue;
-
-                    }
-                    if (serverAnswer.equals("json")) {
-                        getJson = true;
-                        continue;
-                    }
-                    if (serverAnswer.contains("end game")) {
-                        synchronized (Client.lockForStartGame) {
-                            Client.counterForUpdate = 0;
-                            Client.setGameStart(false);
-                            Client.setUpdateTable(false);
-                        }
-                        Client.endGame = true;
-                    }
-
-                    System.out.println(serverAnswer);
-
-                    if (serverAnswer.equals("end")) {
-                        Client.setEndOfClient(true);
-                        return;
-                    }
-                }
-
-
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-}
-
 public class Client extends Application {
     static final Object lock = new Object();
     static final Object lockForStartGame = new Object();
@@ -127,12 +35,12 @@ public class Client extends Application {
     private static boolean updateTable = false;
     static Table table;
     static boolean gameStart = false;
-    private Group menuRoot = new Group();
     private static Cell[][] cells;
     private static Formatter formatter;
     static int counterForUpdate = 0;
     private static String userName;
     static boolean endGame = false;
+    static Scanner inputFromServer;
 
     static void setGameStart(boolean gameStart) {
         synchronized (lockForStartGame) {
@@ -155,8 +63,68 @@ public class Client extends Application {
 
     }
 
+    static Button makeButton(String input,int x,int y,Group root){
+        Button button = new Button(input);
+        button.setPrefSize(200, 30);
+        button.setTextFill(Color.PINK);
+        root.getChildren().add(button);
+        button.relocate(x, y);
+        return button;
+    }
+
     public void start(Stage primaryStage) {
-        Scene menuScene = new Scene(menuRoot, 800, 800, Color.rgb(77, 255, 255));
+        Group menuRoot = new Group();
+        Scene menuScene = new Scene(menuRoot, 800, 800, Color.rgb(10, 50, 100));
+        Group scoreBoardRoot = new Group();
+        Scene scoreBoardScene = new Scene(scoreBoardRoot, 800, 800, Color.rgb(50, 171, 200));
+        Group resumeRoot = new Group();
+        Scene resumeScene = new Scene(resumeRoot, 800, 800, Color.rgb(90, 230, 230, 0.2));
+        Group setTableRoot = new Group();
+        Scene setTableScene = new Scene(setTableRoot, 800,800, Color.rgb(80, 230, 250, 0.6));
+        Group gameRoot = new Group();
+        Scene gameScene = new Scene(gameRoot, 800, 800, Color.rgb(77, 255, 255));
+
+        makeButton("New Game",300,200,menuRoot).setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+
+            }
+        });
+        makeButton("resume",300,240,menuRoot).setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+            }
+        });
+        makeButton("scoreboard",300,280,menuRoot).setOnMouseClicked(event -> {
+            formatter.format("%s\n","scoreBoard");
+            formatter.flush();
+           while (true){
+               if(scannerInput.hasNextLine()){
+                   Gson gson = new Gson();
+                   TypeToken<List<String>> a = new TypeToken<>();
+                   ArrayList<String> strings= gson.fromJson(inputFromServer.nextLine(), a.getType());
+                   ScoreBoard.showScoreBoard(menuScene,scoreBoardRoot,primaryStage,strings);
+                   break;
+               }
+           }
+
+        });
+
+        makeButton("setTable",300,320,menuRoot).setOnMouseClicked(event -> SetTable.getTable(setTableRoot,formatter,menuScene,primaryStage));
+
+        makeButton("quit",300,360,menuRoot).setOnMouseClicked(event -> {
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Quit Dialog");
+            alert.setHeaderText("Quit from game");
+            alert.setContentText("Are you sure?");
+
+            Optional<ButtonType> result = alert.showAndWait();
+            if (result.get() == ButtonType.OK) {
+                primaryStage.close();
+                formatter.format("quit");
+            }
+        });
+
 
         char[][] tables = table.gameTable;
         cells = new Cell[table.getN()][table.getM()];
@@ -164,7 +132,7 @@ public class Client extends Application {
         for (int i = 0; i < table.getN(); i++) {
             for (int j = 0; j < table.getM(); j++) {
                 int scale = 100;
-                cells[i][j] = new Cell((3 + scale) * i + 3, (3 + scale) * j + 3, tables[i][2 * j], menuRoot, scale);
+                cells[i][j] = new Cell((3 + scale) * i + 3, (3 + scale) * j + 3, tables[i][2 * j], gameRoot, scale);
             }
         }
 
@@ -173,7 +141,7 @@ public class Client extends Application {
         text.setFont(Font.font(50));
         text.setFill(Color.BLACK);
         text.setUnderline(true);
-        menuRoot.getChildren().add(text);
+        gameRoot.getChildren().add(text);
 
         GridPane grid = new GridPane();
         final Label label = new Label();
@@ -191,7 +159,7 @@ public class Client extends Application {
         GridPane.setConstraints(name, 0, 0);
         grid.getChildren().add(name);
 
-        menuRoot.getChildren().add(grid);
+        gameRoot.getChildren().add(grid);
         Button submit = new Button("ENTER");
         GridPane.setConstraints(submit, 1, 0);
         grid.getChildren().add(submit);
@@ -208,7 +176,7 @@ public class Client extends Application {
         Button stopButton = new Button("STOP");
         stopButton.setPrefSize(100, 30);
         stopButton.setTextFill(Color.PINK);
-        menuRoot.getChildren().add(stopButton);
+        gameRoot.getChildren().add(stopButton);
         stopButton.relocate(670, 610);
         stopButton.setOnMouseClicked(event -> {
             formatter.format("%s\n", "stop");
@@ -219,7 +187,7 @@ public class Client extends Application {
         Button undoButton = new Button("UNDO");
         undoButton.setPrefSize(100, 30);
         undoButton.setTextFill(Color.PINK);
-        menuRoot.getChildren().add(undoButton);
+        gameRoot.getChildren().add(undoButton);
         undoButton.relocate(670, 670);
         undoButton.setOnMouseClicked(event -> {
             formatter.format("%s\n", "undo");
@@ -229,7 +197,7 @@ public class Client extends Application {
         Button pauseButton = new Button("PAUSE");
         pauseButton.setPrefSize(100, 30);
         pauseButton.setTextFill(Color.PINK);
-        menuRoot.getChildren().add(pauseButton);
+        gameRoot.getChildren().add(pauseButton);
         pauseButton.relocate(670, 730);
         pauseButton.setOnMouseClicked(event -> {
             formatter.format("%s\n", "pause");
@@ -258,7 +226,7 @@ public class Client extends Application {
 //        };
 //        animationTimer1.start();
 
-        primaryStage.setScene(menuScene);
+        primaryStage.setScene(gameScene);
         primaryStage.show();
 
 
@@ -275,7 +243,7 @@ public class Client extends Application {
             OutputStream outputStream = socket.getOutputStream();
             formatter = new Formatter(outputStream);
             InputStream inputStream = socket.getInputStream();
-            Scanner scanner = new Scanner(inputStream);
+            inputFromServer = new Scanner(inputStream);
 
 
             //for make username
@@ -287,13 +255,13 @@ public class Client extends Application {
                 formatter.format("%s\n", userName);
                 formatter.flush();
                 while (true) {
-                    if (scanner.hasNextLine())
+                    if (inputFromServer.hasNextLine())
                         break;
                 }
-            } while (!scanner.nextLine().trim().equals(userName + " accepted"));
+            } while (!inputFromServer.nextLine().trim().equals(userName + " accepted"));
 
-            new ThreadForGetInputFromServer(scanner).start();
-            new ThreadForGetFromClient(scannerInput, formatter).start();
+           // new ThreadForGetInputFromServer(inputFromServer).start();
+            //new ThreadForGetFromClient(scannerInput, formatter).start();
             //
 
             while (true) {
