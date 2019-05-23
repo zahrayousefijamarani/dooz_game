@@ -39,7 +39,7 @@ class ThreadForGetInputFromServer extends Thread {
                         getJson = false;
                         if (Client.counterForUpdate == 1)
                             synchronized (Client.lockForStartGame) {
-                                Client.setGameStart(true);
+                                //Client.setGameStart(true);
                             }
                         continue;
 
@@ -51,7 +51,7 @@ class ThreadForGetInputFromServer extends Thread {
                     if (serverAnswer.contains("end game")) {
                         synchronized (Client.lockForStartGame) {
                             Client.counterForUpdate = 0;
-                            Client.setGameStart(false);
+                           // Client.setGameStart(false);
                             Client.setUpdateTable(false);
                         }
                         Client.endGame = true;

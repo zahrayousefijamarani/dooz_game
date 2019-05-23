@@ -300,21 +300,19 @@ public class Game {
     public void showTheGame() {
         Gson gson = new Gson();
         String json = gson.toJson(table);
-        playerForOneGame[0].getServerFormatter().format("json\n%s\n",json);
-        playerForOneGame[1].getServerFormatter().format("json\n%s\n",json);
+        playerForOneGame[0].getServerFormatter().format("%s\n",json);
+        playerForOneGame[1].getServerFormatter().format("%s\n",json);
         playerForOneGame[0].getServerFormatter().flush();
         playerForOneGame[1].getServerFormatter().flush();
 
-        if (turn == 1) {
-            playerForOneGame[0].getServerFormatter().format("%s\n",playerForOneGame[0].name);
-            playerForOneGame[1].getServerFormatter().format("%s\n",playerForOneGame[0].name);
-            playerForOneGame[0].getServerFormatter().format("%s\n","is your turn");
-        }
-        if (turn == 2) {
-            playerForOneGame[0].getServerFormatter().format("%s\n",playerForOneGame[1].name);
-            playerForOneGame[1].getServerFormatter().format("%s\n",playerForOneGame[1].name);
-            playerForOneGame[1].getServerFormatter().format("%s\n","is your turn");
-        }
+//        if (turn == 1) {
+//            playerForOneGame[0].getServerFormatter().format("%s\n is your turn",playerForOneGame[0].name);
+//            playerForOneGame[1].getServerFormatter().format("%s\n is your turn",playerForOneGame[0].name);
+//        }
+//        if (turn == 2) {
+//            playerForOneGame[0].getServerFormatter().format("%s\n is your turn",playerForOneGame[1].name);
+//            playerForOneGame[1].getServerFormatter().format("%s\n is your turn",playerForOneGame[1].name);
+//        }
 
         playerForOneGame[0].getServerFormatter().flush();
         playerForOneGame[1].getServerFormatter().flush();

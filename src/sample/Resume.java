@@ -15,11 +15,12 @@ import javax.xml.soap.Text;
 import java.awt.font.TextMeasurer;
 import java.util.ArrayList;
 import java.util.Formatter;
+import java.util.Scanner;
 
 
 public class Resume {
     static void showResume(ArrayList<String> strings, Group resumeRoot, Stage primaryStage,
-                           Formatter formatter, Scene menuScene,Scene gameScene) {
+                           Formatter formatter, Scene menuScene, Scene gameScene, Scanner inputFromServer) {
         Rectangle rectangle;
         for (int i = 0; i < strings.size(); i++) {
             rectangle = new Rectangle(200, 30 * i + 10, 200, 25);
@@ -57,7 +58,15 @@ public class Resume {
                 formatter.format("%s\n",n.getText());
                 formatter.flush();
                 grid.getChildren().clear();
-                primaryStage.setScene(menuScene);
+                while (true){
+                    if(inputFromServer.hasNextLine()){
+                        if(inputFromServer.nextLine().equals("start a game")){
+                            primaryStage.setScene(gameScene);
+                            Client.gameStart = true;
+                        }
+                        break;
+                    }
+                }
             }
 
         });

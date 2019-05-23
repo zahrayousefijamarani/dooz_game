@@ -10,9 +10,11 @@ import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 
 import java.util.Formatter;
+import java.util.Scanner;
 
 public class NewGame {
-    static void getAccount(Group getNameRoot, Formatter formatter, Stage primaryStage , Scene menuScene){
+    static void getAccount(Group getNameRoot, Formatter formatter, Stage primaryStage,
+                           Scene menuScene, Scanner inputFromServer, Scene gameScene) {
 
         GridPane grid = new GridPane();
         final Label label = new Label();
@@ -35,13 +37,26 @@ public class NewGame {
         GridPane.setConstraints(submit, 1, 0);
         grid.getChildren().add(submit);
         submit.setOnAction(event -> {
-            if (name.getText().trim().equals("") ) {
+            if (name.getText().trim().equals("")) {
                 label.setText("Invalid");
             } else {
                 formatter.format("%s\n", "new game " + name.getText());
                 formatter.flush();
                 grid.getChildren().remove(label);
-                primaryStage.setScene(menuScene);
+
+                while (true) {
+                    if (inputFromServer.hasNextLine()) {
+                        if (inputFromServer.nextLine().equals("start a game")) {
+                            primaryStage.setScene(gameScene);
+                            Client.gameStart = true;
+                        } else {
+                            primaryStage.setScene(menuScene);
+                        }
+                        break;
+                    }
+                }
+
+
             }
 
         });

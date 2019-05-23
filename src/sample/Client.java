@@ -34,12 +34,13 @@ public class Client extends Application {
     private static String userName;
     static boolean endGame = false;
     private static Scanner inputFromServer;
+    char[][] tables;
 
-    static void setGameStart(boolean gameStart) {
-        synchronized (lockForStartGame) {
-            Client.gameStart = gameStart;
-        }
-    }
+//    static void setGameStart(boolean gameStart) {
+//        synchronized (lockForStartGame) {
+//            Client.gameStart = gameStart;
+//        }
+//    }
 
     static void setUpdateTable(boolean gameStart) {
         synchronized (lock) {
@@ -66,8 +67,9 @@ public class Client extends Application {
     }
 
     public void start(Stage primaryStage) {
+        String serverAnswer;
         Group getUserNameRoot = new Group();
-        Scene getUserNameScene = new Scene(getUserNameRoot,800, 800, Color.rgb(65, 80, 249));
+        Scene getUserNameScene = new Scene(getUserNameRoot, 800, 800, Color.rgb(65, 80, 249));
         Group menuRoot = new Group();
         Scene menuScene = new Scene(menuRoot, 800, 800, Color.rgb(10, 204, 255));
         Group scoreBoardRoot = new Group();
@@ -79,7 +81,7 @@ public class Client extends Application {
         Group gameRoot = new Group();
         Scene gameScene = new Scene(gameRoot, 800, 800, Color.rgb(77, 255, 255));
         Group getNameRoot = new Group();
-        Scene getNameScene = new Scene(getNameRoot,800, 800, Color.rgb(100, 150, 255));
+        Scene getNameScene = new Scene(getNameRoot, 800, 800, Color.rgb(100, 150, 255));
 
 
         GridPane gridStart = new GridPane();
@@ -103,51 +105,53 @@ public class Client extends Application {
         Button submitButton = new Button("Submit");
         GridPane.setConstraints(submitButton, 1, 0);
         gridStart.getChildren().add(submitButton);
-
-
         submitButton.setOnAction(event -> {
             if (name.getText().trim().equals("")) {
                 labelStart.setText("You have not enter username");
             } else {
-                    userName = name.getText();
-                    formatter.format("%s\n", userName);
-                    formatter.flush();
-                    while (true) {
-                        if (inputFromServer.hasNextLine()) {
-                            break;
-                        }
+                userName = name.getText();
+                formatter.format("%s\n", userName);
+                formatter.flush();
+                while (true) {
+                    if (inputFromServer.hasNextLine()) {
+                        break;
                     }
-                if(inputFromServer.nextLine().trim().equals(userName + " accepted")) {
-                    primaryStage.setScene(menuScene);
                 }
-                else{
+                if (inputFromServer.nextLine().trim().equals(userName + " accepted")) {
+                    primaryStage.setScene(menuScene);
+                    primaryStage.setTitle(userName);
+                } else {
                     labelStart.setText("Enter your name");
                 }
             }
 
         });
 
-        AnimationTimer animationTimer = new AnimationTimer() {
-            @Override
-            public void handle(long now) {
+//        AnimationTimer animationTimer = new AnimationTimer() {
+//            @Override
+//            public void handle(long now) {
+//
+//
+//            }
+//        };
+//        animationTimer.start();
 
-            }
-        };
-        animationTimer.start();
 
         makeButton("New Game", 300, 200, menuRoot).setOnMouseClicked(event -> {
             primaryStage.setScene(getNameScene);
-            NewGame.getAccount(getNameRoot,formatter,primaryStage,menuScene);
+            NewGame.getAccount(getNameRoot, formatter, primaryStage, menuScene, inputFromServer, gameScene);
+
         });
         makeButton("resume", 300, 240, menuRoot).setOnMouseClicked(event -> {
-            formatter.format("%s\n","resume");
+            formatter.format("%s\n", "resume");
             formatter.flush();
-            while(true){
-                if(inputFromServer.hasNextLine()){
+            while (true) {
+                if (inputFromServer.hasNextLine()) {
                     Gson gson = new Gson();
-                    ArrayList<String> strings = gson.fromJson(inputFromServer.nextLine(), new TypeToken<List<String>>(){}.getType());
+                    ArrayList<String> strings = gson.fromJson(inputFromServer.nextLine(), new TypeToken<List<String>>() {
+                    }.getType());
                     primaryStage.setScene(resumeScene);
-                    Resume.showResume(strings,resumeRoot,primaryStage,formatter,menuScene,gameScene);
+                    Resume.showResume(strings, resumeRoot, primaryStage, formatter, menuScene, gameScene, inputFromServer);
                     break;
                 }
             }
@@ -160,7 +164,8 @@ public class Client extends Application {
                 if (inputFromServer.hasNextLine()) {
                     Gson gson = new Gson();
                     ArrayList<String> strings = gson.fromJson(inputFromServer.nextLine(),
-                            new TypeToken<List<String>>(){}.getType());
+                            new TypeToken<List<String>>() {
+                            }.getType());
                     primaryStage.setScene(scoreBoardScene);
                     ScoreBoard.showScoreBoard(menuScene, scoreBoardRoot, primaryStage, strings, formatter);
                     break;
@@ -188,23 +193,27 @@ public class Client extends Application {
             }
         });
 
+        if (gameStart) {
+            while (true) {
+                if (inputFromServer.hasNextLine()) {
+                    Gson gson = new Gson();
+                    Client.table = gson.fromJson(inputFromServer.nextLine(), Table.class);
+                    tables = table.gameTable;
+                    cells = new Cell[table.getN()][table.getM()];
+                    gameStart = false;
+                    for (int i = 0; i < table.getN(); i++) {
+                        for (int j = 0; j < table.getM(); j++) {
+                            int scale = 100;
+                            cells[i][j] = new Cell((3 + scale) * i + 3, (3 + scale) * j + 3, tables[i][2 * j], gameRoot, scale);
+                        }
+                    }
+                    break;
+                }
+            }
+        }
 
-//        char[][] tables = table.gameTable;
-//        cells = new Cell[table.getN()][table.getM()];
+
 //
-//        for (int i = 0; i < table.getN(); i++) {
-//            for (int j = 0; j < table.getM(); j++) {
-//                int scale = 100;
-//                cells[i][j] = new Cell((3 + scale) * i + 3, (3 + scale) * j + 3, tables[i][2 * j], gameRoot, scale);
-//            }
-//        }
-//
-//        Text text = new Text(userName);
-//        text.relocate(350, 710);
-//        text.setFont(Font.font(50));
-//        text.setFill(Color.BLACK);
-//        text.setUnderline(true);
-//        gameRoot.getChildren().add(text);
 //
 ////        GridPane grid = new GridPane();
 ////        final Label label = new Label();
