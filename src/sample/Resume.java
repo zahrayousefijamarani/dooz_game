@@ -39,13 +39,13 @@ public class Resume {
         grid.relocate(100, 720);
 //Defining the Name text field
         final TextField n = new TextField();
-        n.setPromptText("Enter N");
+        n.setPromptText("Enter Number");
         n.setPrefColumnCount(10);
         GridPane.setConstraints(n, 0, 0);
         grid.getChildren().add(n);
 
         resumeRoot.getChildren().add(grid);
-        Button submit = new Button("Submit");
+        Button submit = new Button("Enter");
         GridPane.setConstraints(submit, 1, 0);
         grid.getChildren().add(submit);
         submit.setOnAction(event -> {
@@ -64,7 +64,7 @@ public class Resume {
 
 
 
-        Client.makeButton("back", 550, 720, resumeRoot).setOnMouseClicked(event -> {
+        Client.makeButton("back", 550, 730, resumeRoot).setOnMouseClicked(event -> {
             resumeRoot.getChildren().clear();
             primaryStage.setScene(menuScene);
             formatter.format("%s\n", "back");

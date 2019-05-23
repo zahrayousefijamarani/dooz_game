@@ -27,10 +27,10 @@ public class DoozMain {
                 else if (lineOfOrder.equals("quit")) {
                     return "end";
                 }
-                else {
-                    formatter.format("%s\n", "Invalid command");
-                    formatter.flush();
-                }
+//                else {
+//                    formatter.format("%s\n", "Invalid command");
+//                    formatter.flush();
+//                }
                 break;
             }
             case "resume":
@@ -39,9 +39,6 @@ public class DoozMain {
                 else if (lineOfOrder.trim().matches("\\d+")) {
                     if (menuOfTheGame.resumeNumber(Integer.parseInt(lineOfOrder.trim())))
                         state = "resumeChose";
-                } else {
-                    formatter.format("%s\n", "Invalid command for resume");
-                    formatter.flush();
                 }
                 break;
             case "menu":
@@ -71,10 +68,6 @@ public class DoozMain {
                     me.setTable(m, n);
                 }
 
-                else {
-                     formatter.format("%s\n", "Invalid command for menu");
-                     formatter.flush();
-                }
                 break;
             case "game":
                 if (putMatcher.find() ) {
@@ -97,16 +90,12 @@ public class DoozMain {
                 } else if (lineOfOrder.trim().equals("stop")) {
                     menuOfTheGame.deleteGame();
                     state = "menu";
-                } else {
-                    formatter.format("%s\n","Invalid command");
-                    formatter.flush();
-                    menuOfTheGame.presentGame().showTheGame();
                 }
                 break;
-                default:
-                    formatter.format("%s\n","Invalid command for whole of game");
-                    formatter.flush();
-                    break;
+//                default:
+//                    formatter.format("%s\n","Invalid command for whole of game");
+//                    formatter.flush();
+//                    break;
 
         }
 

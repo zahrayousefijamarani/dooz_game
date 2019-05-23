@@ -75,7 +75,7 @@ public class Menu {
         ArrayList<String> outPut=new ArrayList<>();
         sortPlayers();
         for (Player player : players) {
-           outPut.add (player.name + " " + player.won + " " + player.loss + " " + player.draw);
+           outPut.add (player.name + "  " + player.won + "  " + player.loss + "  " + player.draw);
         }
         Gson gson = new Gson();
         String json = gson.toJson(outPut);

@@ -6,19 +6,12 @@ import com.google.gson.reflect.TypeToken;
 import dooz.Table;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
-import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 import java.io.*;
@@ -40,7 +33,7 @@ public class Client extends Application {
     static int counterForUpdate = 0;
     private static String userName;
     static boolean endGame = false;
-    static Scanner inputFromServer;
+    private static Scanner inputFromServer;
 
     static void setGameStart(boolean gameStart) {
         synchronized (lockForStartGame) {
@@ -66,15 +59,17 @@ public class Client extends Application {
     static Button makeButton(String input, int x, int y, Group root) {
         Button button = new Button(input);
         button.setPrefSize(200, 30);
-        button.setTextFill(Color.PINK);
+        button.setTextFill(Color.RED);
         root.getChildren().add(button);
         button.relocate(x, y);
         return button;
     }
 
     public void start(Stage primaryStage) {
+        Group getUserNameRoot = new Group();
+        Scene getUserNameScene = new Scene(getUserNameRoot,800, 800, Color.rgb(65, 80, 249));
         Group menuRoot = new Group();
-        Scene menuScene = new Scene(menuRoot, 800, 800, Color.rgb(10, 50, 100));
+        Scene menuScene = new Scene(menuRoot, 800, 800, Color.rgb(10, 204, 255));
         Group scoreBoardRoot = new Group();
         Scene scoreBoardScene = new Scene(scoreBoardRoot, 800, 800, Color.rgb(50, 171, 200));
         Group resumeRoot = new Group();
@@ -86,6 +81,60 @@ public class Client extends Application {
         Group getNameRoot = new Group();
         Scene getNameScene = new Scene(getNameRoot,800, 800, Color.rgb(100, 150, 255));
 
+
+        GridPane gridStart = new GridPane();
+        final Label labelStart = new Label();
+        labelStart.setTextFill(Color.BLACK);
+        GridPane.setConstraints(labelStart, 0, 3);
+        GridPane.setColumnSpan(labelStart, 2);
+        gridStart.getChildren().add(labelStart);
+        gridStart.setPadding(new Insets(10, 10, 10, 10));
+        gridStart.setVgap(5);
+        gridStart.setHgap(5);
+        gridStart.relocate(300, 300);
+//Defining the Name text field
+        final TextField name = new TextField();
+        name.setPromptText("Enter your userName.");
+        name.setPrefColumnCount(10);
+        GridPane.setConstraints(name, 0, 0);
+        gridStart.getChildren().add(name);
+
+        getUserNameRoot.getChildren().add(gridStart);
+        Button submitButton = new Button("Submit");
+        GridPane.setConstraints(submitButton, 1, 0);
+        gridStart.getChildren().add(submitButton);
+
+
+        submitButton.setOnAction(event -> {
+            if (name.getText().trim().equals("")) {
+                labelStart.setText("You have not enter username");
+            } else {
+                    userName = name.getText();
+                    formatter.format("%s\n", userName);
+                    formatter.flush();
+                    while (true) {
+                        if (inputFromServer.hasNextLine()) {
+                            break;
+                        }
+                    }
+                if(inputFromServer.nextLine().trim().equals(userName + " accepted")) {
+                    primaryStage.setScene(menuScene);
+                }
+                else{
+                    labelStart.setText("Enter your name");
+                }
+            }
+
+        });
+
+        AnimationTimer animationTimer = new AnimationTimer() {
+            @Override
+            public void handle(long now) {
+
+            }
+        };
+        animationTimer.start();
+
         makeButton("New Game", 300, 200, menuRoot).setOnMouseClicked(event -> {
             primaryStage.setScene(getNameScene);
             NewGame.getAccount(getNameRoot,formatter,primaryStage,menuScene);
@@ -96,8 +145,7 @@ public class Client extends Application {
             while(true){
                 if(inputFromServer.hasNextLine()){
                     Gson gson = new Gson();
-                    TypeToken<List<String>> a = new TypeToken<>();
-                    ArrayList<String> strings = gson.fromJson(inputFromServer.nextLine(), a.getType());
+                    ArrayList<String> strings = gson.fromJson(inputFromServer.nextLine(), new TypeToken<List<String>>(){}.getType());
                     primaryStage.setScene(resumeScene);
                     Resume.showResume(strings,resumeRoot,primaryStage,formatter,menuScene,gameScene);
                     break;
@@ -106,13 +154,13 @@ public class Client extends Application {
         });
 
         makeButton("scoreboard", 300, 280, menuRoot).setOnMouseClicked(event -> {
-            formatter.format("%s\n", "scoreBoard");
+            formatter.format("%s\n", "scoreboard");
             formatter.flush();
             while (true) {
                 if (inputFromServer.hasNextLine()) {
                     Gson gson = new Gson();
-                    TypeToken<List<String>> a = new TypeToken<>();
-                    ArrayList<String> strings = gson.fromJson(inputFromServer.nextLine(), a.getType());
+                    ArrayList<String> strings = gson.fromJson(inputFromServer.nextLine(),
+                            new TypeToken<List<String>>(){}.getType());
                     primaryStage.setScene(scoreBoardScene);
                     ScoreBoard.showScoreBoard(menuScene, scoreBoardRoot, primaryStage, strings, formatter);
                     break;
@@ -126,7 +174,6 @@ public class Client extends Application {
             SetTable.getTable(setTableRoot, formatter, menuScene, primaryStage);
 
         });
-
 
         makeButton("quit", 300, 360, menuRoot).setOnMouseClicked(event -> {
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
@@ -142,107 +189,107 @@ public class Client extends Application {
         });
 
 
-        char[][] tables = table.gameTable;
-        cells = new Cell[table.getN()][table.getM()];
-
-        for (int i = 0; i < table.getN(); i++) {
-            for (int j = 0; j < table.getM(); j++) {
-                int scale = 100;
-                cells[i][j] = new Cell((3 + scale) * i + 3, (3 + scale) * j + 3, tables[i][2 * j], gameRoot, scale);
-            }
-        }
-
-        Text text = new Text(userName);
-        text.relocate(350, 710);
-        text.setFont(Font.font(50));
-        text.setFill(Color.BLACK);
-        text.setUnderline(true);
-        gameRoot.getChildren().add(text);
-
-        GridPane grid = new GridPane();
-        final Label label = new Label();
-        GridPane.setConstraints(label, 0, 3);
-        GridPane.setColumnSpan(label, 2);
-        grid.getChildren().add(label);
-        grid.setPadding(new Insets(10, 10, 10, 10));
-        grid.setVgap(5);
-        grid.setHgap(5);
-        grid.relocate(100, 700);
-//Defining the Name text field
-        final TextField name = new TextField();
-        name.setPromptText("Enter command");
-        name.setPrefColumnCount(10);
-        GridPane.setConstraints(name, 0, 0);
-        grid.getChildren().add(name);
-
-        gameRoot.getChildren().add(grid);
-        Button submit = new Button("ENTER");
-        GridPane.setConstraints(submit, 1, 0);
-        grid.getChildren().add(submit);
-        submit.setOnAction(event -> {
-            if (name.getText().trim().equals("")) {
-                label.setText("You have not enter username");
-            } else {
-                formatter.format("%s\n", name.getText());
-                formatter.flush();
-                grid.getChildren().remove(label);
-            }
-
-        });
-        Button stopButton = new Button("STOP");
-        stopButton.setPrefSize(100, 30);
-        stopButton.setTextFill(Color.PINK);
-        gameRoot.getChildren().add(stopButton);
-        stopButton.relocate(670, 610);
-        stopButton.setOnMouseClicked(event -> {
-            formatter.format("%s\n", "stop");
-            formatter.flush();
-            primaryStage.close();
-        });
-
-        Button undoButton = new Button("UNDO");
-        undoButton.setPrefSize(100, 30);
-        undoButton.setTextFill(Color.PINK);
-        gameRoot.getChildren().add(undoButton);
-        undoButton.relocate(670, 670);
-        undoButton.setOnMouseClicked(event -> {
-            formatter.format("%s\n", "undo");
-            formatter.flush();
-        });
-
-        Button pauseButton = new Button("PAUSE");
-        pauseButton.setPrefSize(100, 30);
-        pauseButton.setTextFill(Color.PINK);
-        gameRoot.getChildren().add(pauseButton);
-        pauseButton.relocate(670, 730);
-        pauseButton.setOnMouseClicked(event -> {
-            formatter.format("%s\n", "pause");
-            formatter.flush();
-            primaryStage.close();
-        });
-
-
-        AnimationTimer animationTimer = new AnimationTimer() {
-            @Override
-            public void handle(long now) {
-                updateTableF();
-                Client.setUpdateTable(false);
-            }
-        };
-        animationTimer.start();
-
-//        AnimationTimer animationTimer1 = new AnimationTimer() {
+//        char[][] tables = table.gameTable;
+//        cells = new Cell[table.getN()][table.getM()];
+//
+//        for (int i = 0; i < table.getN(); i++) {
+//            for (int j = 0; j < table.getM(); j++) {
+//                int scale = 100;
+//                cells[i][j] = new Cell((3 + scale) * i + 3, (3 + scale) * j + 3, tables[i][2 * j], gameRoot, scale);
+//            }
+//        }
+//
+//        Text text = new Text(userName);
+//        text.relocate(350, 710);
+//        text.setFont(Font.font(50));
+//        text.setFill(Color.BLACK);
+//        text.setUnderline(true);
+//        gameRoot.getChildren().add(text);
+//
+////        GridPane grid = new GridPane();
+////        final Label label = new Label();
+////        GridPane.setConstraints(label, 0, 3);
+////        GridPane.setColumnSpan(label, 2);
+////        grid.getChildren().add(label);
+////        grid.setPadding(new Insets(10, 10, 10, 10));
+////        grid.setVgap(5);
+////        grid.setHgap(5);
+////        grid.relocate(100, 700);
+//////Defining the Name text field
+////        final TextField name = new TextField();
+////        name.setPromptText("Enter command");
+////        name.setPrefColumnCount(10);
+////        GridPane.setConstraints(name, 0, 0);
+////        grid.getChildren().add(name);
+////
+////        gameRoot.getChildren().add(grid);
+////        Button submit = new Button("ENTER");
+////        GridPane.setConstraints(submit, 1, 0);
+////        grid.getChildren().add(submit);
+////        submit.setOnAction(event -> {
+////            if (name.getText().trim().equals("")) {
+////                label.setText("You have not enter username");
+////            } else {
+////                formatter.format("%s\n", name.getText());
+////                formatter.flush();
+////                grid.getChildren().remove(label);
+////            }
+////
+////        });
+//        Button stopButton = new Button("STOP");
+//        stopButton.setPrefSize(100, 30);
+//        stopButton.setTextFill(Color.PINK);
+//        gameRoot.getChildren().add(stopButton);
+//        stopButton.relocate(670, 610);
+//        stopButton.setOnMouseClicked(event -> {
+//            formatter.format("%s\n", "stop");
+//            formatter.flush();
+//            primaryStage.close();
+//        });
+//
+//        Button undoButton = new Button("UNDO");
+//        undoButton.setPrefSize(100, 30);
+//        undoButton.setTextFill(Color.PINK);
+//        gameRoot.getChildren().add(undoButton);
+//        undoButton.relocate(670, 670);
+//        undoButton.setOnMouseClicked(event -> {
+//            formatter.format("%s\n", "undo");
+//            formatter.flush();
+//        });
+//
+//        Button pauseButton = new Button("PAUSE");
+//        pauseButton.setPrefSize(100, 30);
+//        pauseButton.setTextFill(Color.PINK);
+//        gameRoot.getChildren().add(pauseButton);
+//        pauseButton.relocate(670, 730);
+//        pauseButton.setOnMouseClicked(event -> {
+//            formatter.format("%s\n", "pause");
+//            formatter.flush();
+//            primaryStage.close();
+//        });
+//
+//
+//        AnimationTimer animationTimer = new AnimationTimer() {
 //            @Override
 //            public void handle(long now) {
-//                if (!Client.gameStart) {
-//                    System.out.println("hiii");
-//                    primaryStage.close();
-//                }
+//                updateTableF();
+//                Client.setUpdateTable(false);
 //            }
 //        };
-//        animationTimer1.start();
+//        animationTimer.start();
+//
+////        AnimationTimer animationTimer1 = new AnimationTimer() {
+////            @Override
+////            public void handle(long now) {
+////                if (!Client.gameStart) {
+////                    System.out.println("hiii");
+////                    primaryStage.close();
+////                }
+////            }
+////        };
+////        animationTimer1.start();
 
-        primaryStage.setScene(gameScene);
+        primaryStage.setScene(getUserNameScene);
         primaryStage.show();
 
 
@@ -261,33 +308,34 @@ public class Client extends Application {
             InputStream inputStream = socket.getInputStream();
             inputFromServer = new Scanner(inputStream);
 
+            launch(args);
 
             //for make username
-            do {
-                System.out.println("Please Enter Your UserName");
-                if (!socket.isConnected())
-                    return;
-                userName = scannerInput.nextLine();
-                formatter.format("%s\n", userName);
-                formatter.flush();
-                while (true) {
-                    if (inputFromServer.hasNextLine())
-                        break;
-                }
-            } while (!inputFromServer.nextLine().trim().equals(userName + " accepted"));
+//            do {
+//                System.out.println("Please Enter Your UserName");
+//                if (!socket.isConnected())
+//                    return;
+//                userName = scannerInput.nextLine();
+//                formatter.format("%s\n", userName);
+//                formatter.flush();
+//                while (true) {
+//                    if (inputFromServer.hasNextLine())
+//                        break;
+//                }
+//            } while (!inputFromServer.nextLine().trim().equals(userName + " accepted"));
 
             // new ThreadForGetInputFromServer(inputFromServer).start();
             //new ThreadForGetFromClient(scannerInput, formatter).start();
             //
 
-            while (true) {
-                synchronized (lockForStartGame) {
-                    if (gameStart) {
-                        launch(args);
-                        break;
-                    }
-                }
-            }
+//            while (true) {
+//                synchronized (lockForStartGame) {
+//                    if (gameStart) {
+//                        launch(args);
+//                        break;
+//                    }
+//                }
+//            }
         } catch (Exception e) {
             e.printStackTrace();
         }
