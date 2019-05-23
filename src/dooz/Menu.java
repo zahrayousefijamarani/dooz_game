@@ -75,7 +75,7 @@ public class Menu {
         ArrayList<String> outPut=new ArrayList<>();
         sortPlayers();
         for (Player player : players) {
-           outPut.add (player.name + " " + player.won + " " + player.loss + " " + player.draw+"\n");
+           outPut.add (player.name + " " + player.won + " " + player.loss + " " + player.draw);
         }
         Gson gson = new Gson();
         String json = gson.toJson(outPut);
@@ -95,13 +95,17 @@ public class Menu {
 
     public void resume(Player me) {
         ArrayList<Game > myGame = passYourGame(me);
+        ArrayList<String> strings = new ArrayList<>();
         int counter = 1;
-        formatter.format("%s\n","Your paused games :");
+        strings.add("Your paused games :");
         for (int i = myGame.size() - 1; i >= 0; i--) {
-            formatter.format("%s\n",counter + ". " + myGame.get(i).getPlayerForOneGame()[0].name +
+            strings.add(counter + ". " + myGame.get(i).getPlayerForOneGame()[0].name +
                     " " + myGame.get(i).getPlayerForOneGame()[1].name);
             counter++;
         }
+        Gson gson = new Gson();
+        String json = gson.toJson(strings);
+        formatter.format("%s\n",json);
         formatter.flush();
 
     }

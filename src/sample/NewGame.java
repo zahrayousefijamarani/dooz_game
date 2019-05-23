@@ -1,7 +1,5 @@
 package sample;
 
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Group;
 import javafx.scene.Scene;
@@ -13,9 +11,8 @@ import javafx.stage.Stage;
 
 import java.util.Formatter;
 
-public class SetTable {
-    static void getTable(Group setTableRoot, Formatter formatter, Scene menuScene, Stage primaryStage) {
-
+public class NewGame {
+    static void getAccount(Group getNameRoot, Formatter formatter, Stage primaryStage , Scene menuScene){
 
         GridPane grid = new GridPane();
         final Label label = new Label();
@@ -27,30 +24,23 @@ public class SetTable {
         grid.setHgap(5);
         grid.relocate(300, 300);
 //Defining the Name text field
-        final TextField n = new TextField();
-        n.setPromptText("Enter N");
-        n.setPrefColumnCount(10);
-        GridPane.setConstraints(n, 0, 0);
-        grid.getChildren().add(n);
-//Defining n text field
-        final TextField m = new TextField();
-        m.setPromptText("Enter M");
-        GridPane.setConstraints(m, 0, 1);
-        grid.getChildren().add(m);
+        final TextField name = new TextField();
+        name.setPromptText("Enter N");
+        name.setPrefColumnCount(10);
+        GridPane.setConstraints(name, 0, 0);
+        grid.getChildren().add(name);
 
-        setTableRoot.getChildren().add(grid);
+        getNameRoot.getChildren().add(grid);
         Button submit = new Button("Submit");
         GridPane.setConstraints(submit, 1, 0);
         grid.getChildren().add(submit);
         submit.setOnAction(event -> {
-            if (n.getText().trim().equals("") || m.getText().trim().equals("")) {
+            if (name.getText().trim().equals("") ) {
                 label.setText("Invalid");
-            } else if (!m.getText().matches("\\d+") || !n.getText().matches("\\d+")) {
-                label.setText("Please enter correct number");
             } else {
-                formatter.format("%s\n", "set table " + n.getText() + "*" + m.getText());
+                formatter.format("%s\n", "new game " + name.getText());
                 formatter.flush();
-                grid.getChildren().clear();
+                grid.getChildren().remove(label);
                 primaryStage.setScene(menuScene);
             }
 

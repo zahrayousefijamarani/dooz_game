@@ -63,7 +63,7 @@ public class Client extends Application {
 
     }
 
-    static Button makeButton(String input,int x,int y,Group root){
+    static Button makeButton(String input, int x, int y, Group root) {
         Button button = new Button(input);
         button.setPrefSize(200, 30);
         button.setTextFill(Color.PINK);
@@ -80,39 +80,55 @@ public class Client extends Application {
         Group resumeRoot = new Group();
         Scene resumeScene = new Scene(resumeRoot, 800, 800, Color.rgb(90, 230, 230, 0.2));
         Group setTableRoot = new Group();
-        Scene setTableScene = new Scene(setTableRoot, 800,800, Color.rgb(80, 230, 250, 0.6));
+        Scene setTableScene = new Scene(setTableRoot, 800, 800, Color.rgb(80, 230, 250, 0.6));
         Group gameRoot = new Group();
         Scene gameScene = new Scene(gameRoot, 800, 800, Color.rgb(77, 255, 255));
+        Group getNameRoot = new Group();
+        Scene getNameScene = new Scene(getNameRoot,800, 800, Color.rgb(100, 150, 255));
 
-        makeButton("New Game",300,200,menuRoot).setOnMouseClicked(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event) {
-
-            }
+        makeButton("New Game", 300, 200, menuRoot).setOnMouseClicked(event -> {
+            primaryStage.setScene(getNameScene);
+            NewGame.getAccount(getNameRoot,formatter,primaryStage,menuScene);
         });
-        makeButton("resume",300,240,menuRoot).setOnMouseClicked(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event) {
-            }
-        });
-        makeButton("scoreboard",300,280,menuRoot).setOnMouseClicked(event -> {
-            formatter.format("%s\n","scoreBoard");
+        makeButton("resume", 300, 240, menuRoot).setOnMouseClicked(event -> {
+            formatter.format("%s\n","resume");
             formatter.flush();
-           while (true){
-               if(scannerInput.hasNextLine()){
-                   Gson gson = new Gson();
-                   TypeToken<List<String>> a = new TypeToken<>();
-                   ArrayList<String> strings= gson.fromJson(inputFromServer.nextLine(), a.getType());
-                   ScoreBoard.showScoreBoard(menuScene,scoreBoardRoot,primaryStage,strings);
-                   break;
-               }
-           }
+            while(true){
+                if(inputFromServer.hasNextLine()){
+                    Gson gson = new Gson();
+                    TypeToken<List<String>> a = new TypeToken<>();
+                    ArrayList<String> strings = gson.fromJson(inputFromServer.nextLine(), a.getType());
+                    primaryStage.setScene(resumeScene);
+                    Resume.showResume(strings,resumeRoot,primaryStage,formatter,menuScene,gameScene);
+                    break;
+                }
+            }
+        });
+
+        makeButton("scoreboard", 300, 280, menuRoot).setOnMouseClicked(event -> {
+            formatter.format("%s\n", "scoreBoard");
+            formatter.flush();
+            while (true) {
+                if (inputFromServer.hasNextLine()) {
+                    Gson gson = new Gson();
+                    TypeToken<List<String>> a = new TypeToken<>();
+                    ArrayList<String> strings = gson.fromJson(inputFromServer.nextLine(), a.getType());
+                    primaryStage.setScene(scoreBoardScene);
+                    ScoreBoard.showScoreBoard(menuScene, scoreBoardRoot, primaryStage, strings, formatter);
+                    break;
+                }
+            }
 
         });
 
-        makeButton("setTable",300,320,menuRoot).setOnMouseClicked(event -> SetTable.getTable(setTableRoot,formatter,menuScene,primaryStage));
+        makeButton("setTable", 300, 320, menuRoot).setOnMouseClicked(event -> {
+            primaryStage.setScene(setTableScene);
+            SetTable.getTable(setTableRoot, formatter, menuScene, primaryStage);
 
-        makeButton("quit",300,360,menuRoot).setOnMouseClicked(event -> {
+        });
+
+
+        makeButton("quit", 300, 360, menuRoot).setOnMouseClicked(event -> {
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
             alert.setTitle("Quit Dialog");
             alert.setHeaderText("Quit from game");
@@ -260,7 +276,7 @@ public class Client extends Application {
                 }
             } while (!inputFromServer.nextLine().trim().equals(userName + " accepted"));
 
-           // new ThreadForGetInputFromServer(inputFromServer).start();
+            // new ThreadForGetInputFromServer(inputFromServer).start();
             //new ThreadForGetFromClient(scannerInput, formatter).start();
             //
 

@@ -1,7 +1,5 @@
 package sample;
 
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Group;
 import javafx.scene.Scene;
@@ -9,13 +7,26 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 
+import javax.xml.soap.Text;
+import java.awt.font.TextMeasurer;
+import java.util.ArrayList;
 import java.util.Formatter;
 
-public class SetTable {
-    static void getTable(Group setTableRoot, Formatter formatter, Scene menuScene, Stage primaryStage) {
 
+public class Resume {
+    static void showResume(ArrayList<String> strings, Group resumeRoot, Stage primaryStage,
+                           Formatter formatter, Scene menuScene,Scene gameScene) {
+        Rectangle rectangle;
+        for (int i = 0; i < strings.size(); i++) {
+            rectangle = new Rectangle(200, 30 * i + 10, 200, 25);
+            rectangle.setFill(Color.LIGHTGRAY);
+            resumeRoot.getChildren().add(rectangle);
+            MakeText.textMaker(210,30*i+17,resumeRoot,strings.get(i));
+        }
 
         GridPane grid = new GridPane();
         final Label label = new Label();
@@ -25,30 +36,25 @@ public class SetTable {
         grid.setPadding(new Insets(10, 10, 10, 10));
         grid.setVgap(5);
         grid.setHgap(5);
-        grid.relocate(300, 300);
+        grid.relocate(100, 720);
 //Defining the Name text field
         final TextField n = new TextField();
         n.setPromptText("Enter N");
         n.setPrefColumnCount(10);
         GridPane.setConstraints(n, 0, 0);
         grid.getChildren().add(n);
-//Defining n text field
-        final TextField m = new TextField();
-        m.setPromptText("Enter M");
-        GridPane.setConstraints(m, 0, 1);
-        grid.getChildren().add(m);
 
-        setTableRoot.getChildren().add(grid);
+        resumeRoot.getChildren().add(grid);
         Button submit = new Button("Submit");
         GridPane.setConstraints(submit, 1, 0);
         grid.getChildren().add(submit);
         submit.setOnAction(event -> {
-            if (n.getText().trim().equals("") || m.getText().trim().equals("")) {
+            if (n.getText().trim().equals("") ) {
                 label.setText("Invalid");
-            } else if (!m.getText().matches("\\d+") || !n.getText().matches("\\d+")) {
+            } else if (!n.getText().matches("\\d+")) {
                 label.setText("Please enter correct number");
             } else {
-                formatter.format("%s\n", "set table " + n.getText() + "*" + m.getText());
+                formatter.format("%s\n",n.getText());
                 formatter.flush();
                 grid.getChildren().clear();
                 primaryStage.setScene(menuScene);
@@ -56,5 +62,15 @@ public class SetTable {
 
         });
 
+
+
+        Client.makeButton("back", 550, 720, resumeRoot).setOnMouseClicked(event -> {
+            resumeRoot.getChildren().clear();
+            primaryStage.setScene(menuScene);
+            formatter.format("%s\n", "back");
+            formatter.flush();
+        });
     }
+
+
 }

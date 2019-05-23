@@ -21,11 +21,11 @@ class ScoreBoard {
     static void showScoreBoard(Scene menuScene, Group scoreBoardRoot, Stage primaryStage,
                                ArrayList<String> users, Formatter formatter){
         Rectangle rectangle;
-        System.out.println(users.size());
         for(int i = 0 ;i< users.size();i++){
             rectangle = new Rectangle(200,30*i+10,200,25);
             rectangle.setFill(Color.LIGHTGRAY);
             scoreBoardRoot.getChildren().add(rectangle);
+            MakeText.textMaker(210,30*i+17,scoreBoardRoot,users.get(i));
         }
 
 
