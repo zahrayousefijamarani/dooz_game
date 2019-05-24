@@ -1,7 +1,5 @@
 package sample;
 
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Group;
 import javafx.scene.Scene;
@@ -13,7 +11,7 @@ import javafx.stage.Stage;
 
 import java.util.Formatter;
 
-public class SetTable {
+class SetTable {
     static void getTable(Group setTableRoot, Formatter formatter, Scene menuScene, Stage primaryStage) {
 
 

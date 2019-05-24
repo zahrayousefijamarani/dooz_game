@@ -1,8 +1,6 @@
 package dooz;
 
 import com.google.gson.Gson;
-import sample.Server;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Formatter;
@@ -11,7 +9,7 @@ import static sample.Server.games;
 import static sample.Server.players;
 
 public class Menu {
-    Game game;
+    private Game game;
     private Formatter formatter;
 
     public Game getGame() {
@@ -34,7 +32,7 @@ public class Menu {
         return null;
     }
 
-    public void deleteGame() {
+    void deleteGame() {
         games.remove(game);
     }
 
@@ -46,7 +44,7 @@ public class Menu {
     }
 
 
-    public void sortPlayers() {
+    private void sortPlayers() {
         int length = players.size();
         for (int i = 0; i < length - 1; i++) {
             for (int j = 0; j < length - 1; j++) {
@@ -71,7 +69,7 @@ public class Menu {
         }
     }
 
-    public void scoreBoard() {
+    void scoreBoard() {
         ArrayList<String> outPut=new ArrayList<>();
         sortPlayers();
         for (Player player : players) {
@@ -93,7 +91,7 @@ public class Menu {
         return myGames;
     }
 
-    public void resume(Player me) {
+    void resume(Player me) {
         ArrayList<Game > myGame = passYourGame(me);
         ArrayList<String> strings = new ArrayList<>();
         int counter = 1;
@@ -110,22 +108,16 @@ public class Menu {
 
     }
 
-    public boolean resumeNumber(int number) {
+    boolean resumeNumber(int number) {
         if (number < 1 || number > games.size()) {
             formatter.format("%s\n","Invalid number");
             formatter.flush();
             return false;
         }
-//        game = games.get(games.size() - number);
-//        game.showTheGame();
-//        games.remove(games.size() - number);
-//        games.add(game);
         return true;
-
-
     }
 
-    public Game presentGame() {
+    Game presentGame() {
         return game;
     }
 

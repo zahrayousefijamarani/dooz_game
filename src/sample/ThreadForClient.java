@@ -4,7 +4,6 @@ import dooz.DoozMain;
 import dooz.Game;
 import dooz.Menu;
 import dooz.Player;
-import sample.Server;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -19,7 +18,7 @@ public class ThreadForClient extends Thread {
     private InputStream input;
     private OutputStream output;
 
-    public ThreadForClient(Socket socket, InputStream input, OutputStream output) {
+    ThreadForClient(Socket socket, InputStream input, OutputStream output) {
         this.input = input;
         this.output = output;
         this.socket = socket;
@@ -50,8 +49,8 @@ public class ThreadForClient extends Thread {
             //get username and make player
             do {
                 line = reader.readLine();
-                if(Menu.haveThePlayer((line))!=null){
-                    formatter.format("%s\n","no");
+                if (Menu.haveThePlayer((line)) != null) {
+                    formatter.format("%s\n", "no");
                     formatter.flush();
                     line = null;
                 }
@@ -69,8 +68,8 @@ public class ThreadForClient extends Thread {
 
                     if (me.getState().equals("game") && !line.equals("undo")) {
                         if (!canPlay(menu, me)) {
-                            //formatter.format("%s\n", "is not your turn");
-                            //formatter.flush();
+                            formatter.format("%s\n", "is not your turn");
+                            formatter.flush();
                             continue;
                         }
                     }
@@ -82,8 +81,7 @@ public class ThreadForClient extends Thread {
                         input.close();
                         output.close();
                         socket.close();
-                    }
-                    else if (me.getState().equals("resumeChose")) {
+                    } else if (me.getState().equals("resumeChose")) {
                         ArrayList<Game> games = Server.games;
                         int number = Integer.parseInt(line);
                         game = games.get(games.size() - number);
@@ -103,24 +101,21 @@ public class ThreadForClient extends Thread {
                             game.showTheGame();
                             games.remove(games.size() - number);
                             games.add(game);
-                        }
-                        else{
-                            formatter.format("%s\n","can not resume the game");
+                        } else {
+                            formatter.format("%s\n", "can not resume the game");
                             formatter.flush();
                             me.setState("resume");
                         }
 
 
-                    }
-                    else if (line.contains("pause") || line.contains("stop") || me.getState().equals("winning")) {
+                    } else if (line.contains("pause") || line.contains("stop") || me.getState().equals("winning")) {
                         for (int i = 0; i < 2; i++) {
                             menu.getGame().getPlayerForOneGame()[i].getServerFormatter().format("%s\n", "end game");
                             menu.getGame().getPlayerForOneGame()[i].getServerFormatter().flush();
                             menu.getGame().getPlayerForOneGame()[i].setPlaying(false);
                             menu.getGame().getPlayerForOneGame()[i].setState("menu");
                         }
-                    }
-                    else if (line.matches("new game (\\w+)")) {
+                    } else if (line.matches("new game (\\w+)")) {
                         Player[] players = new Player[2];
                         opponentPlayer = Menu.haveThePlayer(line.split(" ")[2]);
                         if (opponentPlayer != null && !opponentPlayer.getIsPlaying()) {

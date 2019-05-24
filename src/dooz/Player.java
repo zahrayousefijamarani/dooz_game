@@ -1,8 +1,5 @@
 package dooz;
 
-
-import java.net.Socket;
-import java.text.Format;
 import java.util.Formatter;
 
 public class Player {
@@ -13,16 +10,8 @@ public class Player {
     private boolean isPlaying = false;
    private Formatter serverFormatter;
    private String state = "menu";
-   int n=3,m=3;
+   private int n=3,m=3;
    private  Menu menu;
-
-//    public void setTable(Table table) {
-//        this.table = table;
-//    }
-//
-//    public Table getTable() {
-//        return table;
-//    }
 
     public void setMenu(Menu menu) {
         this.menu = menu;
@@ -39,16 +28,16 @@ public class Player {
     public String getState() {
         return state;
     }
-    public void setTable(int m, int n) {
+    void setTable(int m, int n) {
         this.n = n;
         this.m = m;
     }
 
-    public int getM() {
+    int getM() {
         return m;
     }
 
-    public int getN() {
+    int getN() {
         return n;
     }
 

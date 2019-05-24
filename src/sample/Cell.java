@@ -7,11 +7,11 @@ import javafx.scene.text.Text;
 import javafx.scene.paint.Color;
 
 
-public class Cell {
+class Cell {
     private Rectangle rectangle;
     private Text text;
 
-    public Cell(double x, double y, char a, Group root, double height, double width) {
+    Cell(double x, double y, char a, Group root, double height, double width) {
         rectangle = new Rectangle();
         rectangle.setHeight(height);
         rectangle.setWidth(width);
@@ -25,11 +25,15 @@ public class Cell {
         root.getChildren().add(text);
     }
 
-    public String getTextChar() {
-        return text.getText();
+    void setText(String text) {
+        this.text.setText(text);
     }
 
-    public void setText(String text) {
-        this.text.setText(text);
+    Rectangle getRectangle(){
+        return rectangle;
+    }
+
+    Text getText() {
+        return text;
     }
 }

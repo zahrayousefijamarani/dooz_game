@@ -12,6 +12,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 import java.io.*;
@@ -20,7 +21,7 @@ import java.util.*;
 
 
 public class Client extends Application {
-    private static boolean endOfClient = false;
+    private static Label commentLabel;
     private static Table table;
     static boolean gameStart = false;
     private static Cell[][] cells;
@@ -30,15 +31,17 @@ public class Client extends Application {
     private static Scanner inputFromServer;
     private static char[][] tables;
     static String serverAnswer;
-    private static boolean enteredUserName = false;
+    private static boolean updateTable = false;
 
     private static void updateTableF() {
-        Gson gson = new Gson();
-        table = gson.fromJson(serverAnswer, Table.class);
-        tables = table.gameTable;
-        for (int i = 0; i < table.getN(); i++) {
-            for (int j = 0; j < table.getM(); j++) {
-                cells[i][j].setText(table.gameTable[i][2 * j] + "");
+        if (serverAnswer != null) {
+            Gson gson = new Gson();
+            table = gson.fromJson(serverAnswer, Table.class);
+            tables = table.gameTable;
+            for (int i = 0; i < table.getN(); i++) {
+                for (int j = 0; j < table.getM(); j++) {
+                    cells[i][j].setText(table.gameTable[i][2 * j] + "");
+                }
             }
         }
 
@@ -106,22 +109,21 @@ public class Client extends Application {
                 if (serverAnswer.trim().equals(userName + " accepted")) {
                     primaryStage.setScene(menuScene);
                     primaryStage.setTitle(userName);
-                    enteredUserName = true;
                     serverAnswer = null;
                 } else {
-                    labelStart.setText("Enter your name");
+                    labelStart.setText("Have this name");
                 }
 
             }
 
         });
 
-        new ThreadForGetInputFromServer(inputFromServer, gameScene, primaryStage, formatter).start();
+        new ThreadForGetInputFromServer(inputFromServer).start();
 
 
         makeButton("New Game", 300, 200, menuRoot).setOnMouseClicked(event -> {
             primaryStage.setScene(getNameScene);
-            NewGame.getAccount(getNameRoot, formatter, primaryStage, menuScene, gameScene);
+            NewGame.getAccount(getNameRoot, formatter, primaryStage, menuScene);
 
         });
         makeButton("resume", 300, 240, menuRoot).setOnMouseClicked(event -> {
@@ -135,7 +137,7 @@ public class Client extends Application {
                         ArrayList<String> strings = gson.fromJson(serverAnswer, new TypeToken<List<String>>() {
                         }.getType());
                         primaryStage.setScene(resumeScene);
-                        Resume.showResume(strings, resumeRoot, primaryStage, formatter, menuScene, gameScene);
+                        Resume.showResume(strings, resumeRoot, primaryStage, formatter, menuScene);
                         serverAnswer = null;
                         break;
                     }
@@ -190,6 +192,10 @@ public class Client extends Application {
 
             @Override
             public void handle(long now) {
+                if (serverAnswer != null && serverAnswer.charAt(0) != '{') {
+                    Client.commentLabel.setText(serverAnswer);
+                    serverAnswer = null;
+                }
                 if (gameStart && serverAnswer != null) {
                     Gson gson = new Gson();
                     table = gson.fromJson(serverAnswer, Table.class);
@@ -201,16 +207,26 @@ public class Client extends Application {
                     for (int i = 0; i < table.getN(); i++) {
                         for (int j = 0; j < table.getM(); j++) {
                             cells[i][j] = new Cell((j + 1) * DISTANCE + MLENGTH * j,
-                                    (i + 1) * DISTANCE + NLENGTH * i, tables[i][2 * j], gameRoot, NLENGTH,MLENGTH);
+                                    (i + 1) * DISTANCE + NLENGTH * i, tables[i][2 * j], gameRoot, NLENGTH, MLENGTH);
                         }
                     }
                     primaryStage.setScene(gameScene);
+                    updateTable = true;
                     serverAnswer = null;
                 }
-                if(endGame){
+                if (endGame) {
                     primaryStage.setScene(menuScene);
+                    for (int i = 0; i < table.getN(); i++) {
+                        for (int j = 0; j < table.getM(); j++) {
+                            gameRoot.getChildren().remove(cells[i][j].getText());
+                            gameRoot.getChildren().remove(cells[i][j].getRectangle());
+                        }
+                    }
                     endGame = false;
                     serverAnswer = null;
+                }
+                if (updateTable) {
+                    updateTableF();
                 }
             }
 
@@ -219,10 +235,10 @@ public class Client extends Application {
         animationTimer.start();
 
         makeButton("UNDO", 170, 710, gameRoot).setOnMouseClicked(event -> {
-            formatter.format("%s\n","undo");
+            formatter.format("%s\n", "undo");
             formatter.flush();
-            while (true){
-                if(serverAnswer !=null){
+            while (true) {
+                if (serverAnswer != null) {
                     updateTableF();
                     serverAnswer = null;
                     break;
@@ -231,12 +247,12 @@ public class Client extends Application {
 
         });
         makeButton("PAUSE", 380, 710, gameRoot).setOnMouseClicked(event -> {
-            formatter.format("%s\n","pause");
+            formatter.format("%s\n", "pause");
             formatter.flush();
         });
         makeButton("STOP", 590, 710, gameRoot).setOnMouseClicked(event -> {
-           formatter.format("%s\n","stop");
-           formatter.flush();
+            formatter.format("%s\n", "stop");
+            formatter.flush();
 
         });
 
@@ -263,28 +279,23 @@ public class Client extends Application {
         grid.getChildren().add(button);
         button.setOnAction(event -> {
             if (name.getText().trim().equals("")) {
-                label.setText("You have not enter username");
+                label.setText("Enter Coordinate!");
             } else {
-                while (true){
-                    if(serverAnswer !=null){
-                        updateTableF();
-                        serverAnswer = null;
-                        break;
-                    }
-                }
+                formatter.format("%s\n", order.getText());
+                formatter.flush();
             }
-
         });
+        commentLabel = new Label();
+        gameRoot.getChildren().add(commentLabel);
+        commentLabel.relocate(500, 750);
+        commentLabel.setTextFill(Color.BLACK);
+        commentLabel.setFont(Font.font(20));
 
 
         primaryStage.setScene(getUserNameScene);
         primaryStage.show();
 
 
-    }
-
-    static void setEndOfClient(boolean endOfClient) {
-        Client.endOfClient = endOfClient;
     }
 
     public static void main(String[] args) {
@@ -297,33 +308,6 @@ public class Client extends Application {
             inputFromServer = new Scanner(inputStream);
 
             launch(args);
-
-            //for make username
-//            do {
-//                System.out.println("Please Enter Your UserName");
-//                if (!socket.isConnected())
-//                    return;
-//                userName = scannerInput.nextLine();
-//                formatter.format("%s\n", userName);
-//                formatter.flush();
-//                while (true) {
-//                    if (inputFromServer.hasNextLine())
-//                        break;
-//                }
-//            } while (!inputFromServer.nextLine().trim().equals(userName + " accepted"));
-
-            // new ThreadForGetInputFromServer(inputFromServer).start();
-            //new ThreaForGetFromClient(scannerInput, formatter).start();
-            //
-
-//            while (true) {
-//                synchronized (lockForStartGame) {
-//                    if (gameStart) {
-//                        launch(args);
-//                        break;
-//                    }
-//                }
-//            }
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -6,7 +6,7 @@ import java.util.regex.Pattern;
 
 public class DoozMain {
 
-    public static String main(String lineOfOrder, String state, Formatter formatter,Player me,Menu menuOfTheGame) {
+    public static String main(String lineOfOrder, String state, Formatter formatter, Player me, Menu menuOfTheGame) {
         int x, y, m, n;
         Pattern newGamePattern, setTablePattern, putPattern;
         Matcher newGameMatcher, setTableMatcher, putMatcher;
@@ -21,7 +21,7 @@ public class DoozMain {
 
 
         switch (state) {
-            case "scoreBoard":{
+            case "scoreBoard": {
                 if (lineOfOrder.equals("back"))
                     state = "menu";
                 else if (lineOfOrder.equals("quit")) {
@@ -43,8 +43,7 @@ public class DoozMain {
                 break;
             case "menu":
                 if (newGameMatcher.find()) {
-                   }
-                else if (lineOfOrder.equals("resume")) {
+                } else if (lineOfOrder.equals("resume")) {
                     menuOfTheGame.resume(me);
                     state = "resume";
                 } else if (lineOfOrder.equals("scoreboard")) {
@@ -54,7 +53,7 @@ public class DoozMain {
                     return "end";
                 else if (setTableMatcher.find()) {
                     if (setTableMatcher.group(4) != null) {
-                        formatter.format("%s\n","Invalid command");
+                        formatter.format("%s\n", "Invalid command");
                         formatter.flush();
                         return state;
                     }
@@ -70,9 +69,9 @@ public class DoozMain {
 
                 break;
             case "game":
-                if (putMatcher.find() ) {
+                if (putMatcher.find()) {
                     if (putMatcher.group(3) != null) {
-                       // formatter.format("%s\n","Invalid command for put");
+                        formatter.format("%s\n", "Invalid command for put");
                         formatter.flush();
                         menuOfTheGame.presentGame().showTheGame();
                         return state;
@@ -92,11 +91,6 @@ public class DoozMain {
                     state = "menu";
                 }
                 break;
-//                default:
-//                    formatter.format("%s\n","Invalid command for whole of game");
-//                    formatter.flush();
-//                    break;
-
         }
 
         return state;

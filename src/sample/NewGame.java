@@ -10,11 +10,9 @@ import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 
 import java.util.Formatter;
-import java.util.Scanner;
 
 class NewGame {
-    static void getAccount(Group getNameRoot, Formatter formatter, Stage primaryStage,
-                           Scene menuScene, Scene gameScene) {
+    static void getAccount(Group getNameRoot, Formatter formatter, Stage primaryStage, Scene menuScene) {
 
         GridPane grid = new GridPane();
         final Label label = new Label();

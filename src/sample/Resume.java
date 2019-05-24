@@ -15,12 +15,11 @@ import javax.xml.soap.Text;
 import java.awt.font.TextMeasurer;
 import java.util.ArrayList;
 import java.util.Formatter;
-import java.util.Scanner;
 
 
-public class Resume {
+class Resume {
     static void showResume(ArrayList<String> strings, Group resumeRoot, Stage primaryStage,
-                           Formatter formatter, Scene menuScene, Scene gameScene) {
+                           Formatter formatter, Scene menuScene) {
         Rectangle rectangle;
         for (int i = 0; i < strings.size(); i++) {
             rectangle = new Rectangle(200, 30 * i + 10, 200, 25);
