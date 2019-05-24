@@ -93,6 +93,9 @@ public class ThreadForClient extends Thread {
                             for (int i = 0; i < 2; i++) {
                                 game.getPlayerForOneGame()[i].setState("game");
                                 game.getPlayerForOneGame()[i].getServerFormatter().format("%s\n", "start a game");
+
+                                System.out.println("start a game");
+
                                 game.getPlayerForOneGame()[i].getServerFormatter().flush();
                                 game.getPlayerForOneGame()[i].getMenu().setGame(game);
                                 game.getPlayerForOneGame()[i].setPlaying(true);
@@ -139,7 +142,6 @@ public class ThreadForClient extends Thread {
                             formatter.flush();
                             me.setState("menu");
                         }
-
                     }
                 }
             }

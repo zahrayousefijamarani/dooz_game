@@ -20,13 +20,13 @@ import java.util.*;
 
 
 public class Client extends Application {
-    static final Object lock = new Object();
+    static final Object lock = new Object();//for getInput from server
     static final Object lockForStartGame = new Object();
     static final Object lockForCounter = new Object();
     static boolean endOfClient = false;
-    private static Scanner scannerInput = new Scanner(System.in);
+    // private static Scanner scannerInput = new Scanner(System.in);
     private static boolean updateTable = false;
-    static Table table;
+    private static Table table;
     static boolean gameStart = false;
     private static Cell[][] cells;
     private static Formatter formatter;
@@ -34,7 +34,10 @@ public class Client extends Application {
     private static String userName;
     static boolean endGame = false;
     private static Scanner inputFromServer;
-    char[][] tables;
+    private char[][] tables;
+    static String serverAnswer;
+    static boolean enteredUserName = false;
+
 
 //    static void setGameStart(boolean gameStart) {
 //        synchronized (lockForStartGame) {
@@ -42,11 +45,11 @@ public class Client extends Application {
 //        }
 //    }
 
-    static void setUpdateTable(boolean gameStart) {
-        synchronized (lock) {
-            Client.updateTable = gameStart;
-        }
-    }
+//    static void setUpdateTable(boolean gameStart) {
+//        synchronized (lock) {
+//            Client.updateTable = gameStart;
+//        }
+//    }
 
     private static void updateTableF() {
         for (int i = 0; i < table.getN(); i++) {
@@ -67,7 +70,6 @@ public class Client extends Application {
     }
 
     public void start(Stage primaryStage) {
-        String serverAnswer;
         Group getUserNameRoot = new Group();
         Scene getUserNameScene = new Scene(getUserNameRoot, 800, 800, Color.rgb(65, 80, 249));
         Group menuRoot = new Group();
@@ -113,46 +115,49 @@ public class Client extends Application {
                 formatter.format("%s\n", userName);
                 formatter.flush();
                 while (true) {
-                    if (inputFromServer.hasNextLine()) {
+                    if (serverAnswer != null) {
                         break;
                     }
                 }
-                if (inputFromServer.nextLine().trim().equals(userName + " accepted")) {
+                if (serverAnswer.trim().equals(userName + " accepted")) {
                     primaryStage.setScene(menuScene);
                     primaryStage.setTitle(userName);
+                    enteredUserName = true;
+                    serverAnswer = null;
                 } else {
                     labelStart.setText("Enter your name");
                 }
+
             }
 
         });
 
-//        AnimationTimer animationTimer = new AnimationTimer() {
-//            @Override
-//            public void handle(long now) {
-//
-//
-//            }
-//        };
-//        animationTimer.start();
+        new ThreadForGetInputFromServer(inputFromServer, gameScene, primaryStage, formatter).start();
 
 
         makeButton("New Game", 300, 200, menuRoot).setOnMouseClicked(event -> {
             primaryStage.setScene(getNameScene);
-            NewGame.getAccount(getNameRoot, formatter, primaryStage, menuScene, inputFromServer, gameScene);
+            NewGame.getAccount(getNameRoot, formatter, primaryStage, menuScene, gameScene);
 
         });
         makeButton("resume", 300, 240, menuRoot).setOnMouseClicked(event -> {
             formatter.format("%s\n", "resume");
             formatter.flush();
             while (true) {
-                if (inputFromServer.hasNextLine()) {
-                    Gson gson = new Gson();
-                    ArrayList<String> strings = gson.fromJson(inputFromServer.nextLine(), new TypeToken<List<String>>() {
-                    }.getType());
-                    primaryStage.setScene(resumeScene);
-                    Resume.showResume(strings, resumeRoot, primaryStage, formatter, menuScene, gameScene, inputFromServer);
-                    break;
+                try {
+                    formatter.flush();
+                    // System.out.println(serverAnswer);
+                    if (serverAnswer != null) {
+                        Gson gson = new Gson();
+                        ArrayList<String> strings = gson.fromJson(serverAnswer, new TypeToken<List<String>>() {
+                        }.getType());
+                        primaryStage.setScene(resumeScene);
+                        Resume.showResume(strings, resumeRoot, primaryStage, formatter, menuScene, gameScene);
+                        serverAnswer = null;
+                        break;
+                    }
+                } catch (Exception e) {
+                    System.out.println(e);
                 }
             }
         });
@@ -161,14 +166,17 @@ public class Client extends Application {
             formatter.format("%s\n", "scoreboard");
             formatter.flush();
             while (true) {
-                if (inputFromServer.hasNextLine()) {
+                formatter.flush();
+                if (serverAnswer != null) {
                     Gson gson = new Gson();
-                    ArrayList<String> strings = gson.fromJson(inputFromServer.nextLine(),
+                    ArrayList<String> strings = gson.fromJson(serverAnswer,
                             new TypeToken<List<String>>() {
                             }.getType());
                     primaryStage.setScene(scoreBoardScene);
                     ScoreBoard.showScoreBoard(menuScene, scoreBoardRoot, primaryStage, strings, formatter);
+                    serverAnswer = null;
                     break;
+
                 }
             }
 
@@ -193,110 +201,32 @@ public class Client extends Application {
             }
         });
 
-        if (gameStart) {
-            while (true) {
-                if (inputFromServer.hasNextLine()) {
+        AnimationTimer animationTimer = new AnimationTimer() {
+            double NLENGTH, MLENGTH;
+            final double DISTANCE = 10;
+
+            @Override
+            public void handle(long now) {
+                if (gameStart && serverAnswer != null) {
                     Gson gson = new Gson();
-                    Client.table = gson.fromJson(inputFromServer.nextLine(), Table.class);
+                    table = gson.fromJson(serverAnswer, Table.class);
                     tables = table.gameTable;
+                    NLENGTH = (700 - DISTANCE * (table.getN() + 2)) / (float) table.getN();
+                    MLENGTH = (700 - DISTANCE * (table.getM() + 2)) / (float) table.getM();
                     cells = new Cell[table.getN()][table.getM()];
                     gameStart = false;
                     for (int i = 0; i < table.getN(); i++) {
                         for (int j = 0; j < table.getM(); j++) {
-                            int scale = 100;
-                            cells[i][j] = new Cell((3 + scale) * i + 3, (3 + scale) * j + 3, tables[i][2 * j], gameRoot, scale);
+                            cells[i][j] = new Cell((j + 1) * DISTANCE + MLENGTH * j,
+                                    (i + 1) * DISTANCE + NLENGTH * i, tables[i][2 * j], gameRoot, NLENGTH,MLENGTH);
                         }
                     }
-                    break;
+                    primaryStage.setScene(gameScene);
+                    serverAnswer = null;
                 }
             }
-        }
-
-
-//
-//
-////        GridPane grid = new GridPane();
-////        final Label label = new Label();
-////        GridPane.setConstraints(label, 0, 3);
-////        GridPane.setColumnSpan(label, 2);
-////        grid.getChildren().add(label);
-////        grid.setPadding(new Insets(10, 10, 10, 10));
-////        grid.setVgap(5);
-////        grid.setHgap(5);
-////        grid.relocate(100, 700);
-//////Defining the Name text field
-////        final TextField name = new TextField();
-////        name.setPromptText("Enter command");
-////        name.setPrefColumnCount(10);
-////        GridPane.setConstraints(name, 0, 0);
-////        grid.getChildren().add(name);
-////
-////        gameRoot.getChildren().add(grid);
-////        Button submit = new Button("ENTER");
-////        GridPane.setConstraints(submit, 1, 0);
-////        grid.getChildren().add(submit);
-////        submit.setOnAction(event -> {
-////            if (name.getText().trim().equals("")) {
-////                label.setText("You have not enter username");
-////            } else {
-////                formatter.format("%s\n", name.getText());
-////                formatter.flush();
-////                grid.getChildren().remove(label);
-////            }
-////
-////        });
-//        Button stopButton = new Button("STOP");
-//        stopButton.setPrefSize(100, 30);
-//        stopButton.setTextFill(Color.PINK);
-//        gameRoot.getChildren().add(stopButton);
-//        stopButton.relocate(670, 610);
-//        stopButton.setOnMouseClicked(event -> {
-//            formatter.format("%s\n", "stop");
-//            formatter.flush();
-//            primaryStage.close();
-//        });
-//
-//        Button undoButton = new Button("UNDO");
-//        undoButton.setPrefSize(100, 30);
-//        undoButton.setTextFill(Color.PINK);
-//        gameRoot.getChildren().add(undoButton);
-//        undoButton.relocate(670, 670);
-//        undoButton.setOnMouseClicked(event -> {
-//            formatter.format("%s\n", "undo");
-//            formatter.flush();
-//        });
-//
-//        Button pauseButton = new Button("PAUSE");
-//        pauseButton.setPrefSize(100, 30);
-//        pauseButton.setTextFill(Color.PINK);
-//        gameRoot.getChildren().add(pauseButton);
-//        pauseButton.relocate(670, 730);
-//        pauseButton.setOnMouseClicked(event -> {
-//            formatter.format("%s\n", "pause");
-//            formatter.flush();
-//            primaryStage.close();
-//        });
-//
-//
-//        AnimationTimer animationTimer = new AnimationTimer() {
-//            @Override
-//            public void handle(long now) {
-//                updateTableF();
-//                Client.setUpdateTable(false);
-//            }
-//        };
-//        animationTimer.start();
-//
-////        AnimationTimer animationTimer1 = new AnimationTimer() {
-////            @Override
-////            public void handle(long now) {
-////                if (!Client.gameStart) {
-////                    System.out.println("hiii");
-////                    primaryStage.close();
-////                }
-////            }
-////        };
-////        animationTimer1.start();
+        };
+        animationTimer.start();
 
         primaryStage.setScene(getUserNameScene);
         primaryStage.show();
@@ -334,7 +264,7 @@ public class Client extends Application {
 //            } while (!inputFromServer.nextLine().trim().equals(userName + " accepted"));
 
             // new ThreadForGetInputFromServer(inputFromServer).start();
-            //new ThreadForGetFromClient(scannerInput, formatter).start();
+            //new ThreaForGetFromClient(scannerInput, formatter).start();
             //
 
 //            while (true) {

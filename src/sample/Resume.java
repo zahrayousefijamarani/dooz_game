@@ -20,13 +20,13 @@ import java.util.Scanner;
 
 public class Resume {
     static void showResume(ArrayList<String> strings, Group resumeRoot, Stage primaryStage,
-                           Formatter formatter, Scene menuScene, Scene gameScene, Scanner inputFromServer) {
+                           Formatter formatter, Scene menuScene, Scene gameScene) {
         Rectangle rectangle;
         for (int i = 0; i < strings.size(); i++) {
             rectangle = new Rectangle(200, 30 * i + 10, 200, 25);
             rectangle.setFill(Color.LIGHTGRAY);
             resumeRoot.getChildren().add(rectangle);
-            MakeText.textMaker(210,30*i+17,resumeRoot,strings.get(i));
+            MakeText.textMaker(210, 30 * i + 17, resumeRoot, strings.get(i));
         }
 
         GridPane grid = new GridPane();
@@ -50,27 +50,17 @@ public class Resume {
         GridPane.setConstraints(submit, 1, 0);
         grid.getChildren().add(submit);
         submit.setOnAction(event -> {
-            if (n.getText().trim().equals("") ) {
+            if (n.getText().trim().equals("")) {
                 label.setText("Invalid");
             } else if (!n.getText().matches("\\d+")) {
                 label.setText("Please enter correct number");
             } else {
-                formatter.format("%s\n",n.getText());
+                formatter.format("%s\n", n.getText());
                 formatter.flush();
                 grid.getChildren().clear();
-                while (true){
-                    if(inputFromServer.hasNextLine()){
-                        if(inputFromServer.nextLine().equals("start a game")){
-                            primaryStage.setScene(gameScene);
-                            Client.gameStart = true;
-                        }
-                        break;
-                    }
-                }
             }
 
         });
-
 
 
         Client.makeButton("back", 550, 730, resumeRoot).setOnMouseClicked(event -> {

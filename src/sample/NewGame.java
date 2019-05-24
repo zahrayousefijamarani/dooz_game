@@ -14,7 +14,7 @@ import java.util.Scanner;
 
 public class NewGame {
     static void getAccount(Group getNameRoot, Formatter formatter, Stage primaryStage,
-                           Scene menuScene, Scanner inputFromServer, Scene gameScene) {
+                           Scene menuScene, Scene gameScene) {
 
         GridPane grid = new GridPane();
         final Label label = new Label();
@@ -43,22 +43,9 @@ public class NewGame {
                 formatter.format("%s\n", "new game " + name.getText());
                 formatter.flush();
                 grid.getChildren().remove(label);
-
-                while (true) {
-                    if (inputFromServer.hasNextLine()) {
-                        if (inputFromServer.nextLine().equals("start a game")) {
-                            primaryStage.setScene(gameScene);
-                            Client.gameStart = true;
-                        } else {
-                            primaryStage.setScene(menuScene);
-                        }
-                        break;
-                    }
-                }
-
+                primaryStage.setScene(menuScene);
 
             }
-
         });
 
     }
