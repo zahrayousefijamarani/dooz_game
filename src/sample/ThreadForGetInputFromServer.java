@@ -35,8 +35,10 @@ class ThreadForGetInputFromServer extends Thread {
                                 break;
                             }
                         }
-
                         Client.gameStart = true;
+                    }
+                    if(serverAnswer.equals("end game")){
+                        Client.endGame = true;
                     }
                 }
             }

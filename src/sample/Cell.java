@@ -16,7 +16,7 @@ public class Cell {
         rectangle.setHeight(height);
         rectangle.setWidth(width);
         rectangle.relocate(x, y);
-        rectangle.setFill(Color.rgb(44, 247, 240, 0.4));
+        rectangle.setFill(Color.rgb(44, 247, 255, 0.4));
         text = new Text(a + "");
         text.setFill(Color.BLACK);
         text.setFont(Font.font(50));

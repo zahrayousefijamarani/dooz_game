@@ -12,7 +12,7 @@ import javafx.stage.Stage;
 import java.util.Formatter;
 import java.util.Scanner;
 
-public class NewGame {
+class NewGame {
     static void getAccount(Group getNameRoot, Formatter formatter, Stage primaryStage,
                            Scene menuScene, Scene gameScene) {
 
@@ -27,7 +27,7 @@ public class NewGame {
         grid.relocate(300, 300);
 //Defining the Name text field
         final TextField name = new TextField();
-        name.setPromptText("Enter N");
+        name.setPromptText("Enter userName");
         name.setPrefColumnCount(10);
         GridPane.setConstraints(name, 0, 0);
         grid.getChildren().add(name);

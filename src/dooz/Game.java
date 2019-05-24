@@ -185,15 +185,15 @@ public class Game {
     boolean put(int x, int y) {
         if (turn == 1) {
             if (y < 1 || x < 1 || x > n || 2 * y - 1 > 2 * m - 1) {
-                playerForOneGame[0].getServerFormatter().format("%s\n","Invalid coordination");
-                playerForOneGame[0].getServerFormatter().flush();
+                //playerForOneGame[0].getServerFormatter().format("%s\n","Invalid coordination");
+                //playerForOneGame[0].getServerFormatter().flush();
                 showTheGame();
                 return false;
             }
             x -= 1;
             if (table.gameTable[x][2 * (y - 1)] != '_') {
-                playerForOneGame[0].getServerFormatter().format("%s\n","Invalid coordination");
-                playerForOneGame[0].getServerFormatter().flush();
+                //playerForOneGame[0].getServerFormatter().format("%s\n","Invalid coordination");
+                //playerForOneGame[0].getServerFormatter().flush();
                 showTheGame();
                 return false;
             }
@@ -204,15 +204,15 @@ public class Game {
 
         } else {
             if (y < 1 || x < 1 || x > n || 2 * y - 1 > 2 * m - 1) {
-                playerForOneGame[1].getServerFormatter().format("%s\n","Invalid coordination");
-                playerForOneGame[1].getServerFormatter().flush();
+               // playerForOneGame[1].getServerFormatter().format("%s\n","Invalid coordination");
+               // playerForOneGame[1].getServerFormatter().flush();
                 showTheGame();
                 return false;
             }
             x -= 1;
             if (table.gameTable[x][2 * (y - 1)] != '_') {
-                playerForOneGame[1].getServerFormatter().format("%s\n","Invalid coordination");
-                playerForOneGame[1].getServerFormatter().flush();
+                //playerForOneGame[1].getServerFormatter().format("%s\n","Invalid coordination");
+                //playerForOneGame[1].getServerFormatter().flush();
                 showTheGame();
                 return false;
             }
@@ -333,21 +333,21 @@ public class Game {
 
     void undo() {
         if ((turn == 1 && undoForPlayer2) || (turn == 2 && undoForPlayer1)) {//had undo
-            formatter.format("%s\n","Invalid undo");
-            formatter.flush();
+           // formatter.format("%s\n","Invalid undo");
+            //formatter.flush();
             showTheGame();
             return;
 
         } else if (lastMoveOfFirst[0] == -1 || lastMoveOfSecond[0] == -1) {//with no movement
-            formatter.format("%s\n","Invalid undo");
-            formatter.flush();
+            //formatter.format("%s\n","Invalid undo");
+            //formatter.flush();
             showTheGame();
             return;
         }
         if (turn == 1 && !undoForPlayer2) {//undo for player2
             if (checkHasOneBead()) {
-                formatter.format("%s\n","Invalid undo");
-                formatter.flush();
+               // formatter.format("%s\n","Invalid undo");
+               // formatter.flush();
                 showTheGame();
                 return;
             }
@@ -356,8 +356,8 @@ public class Game {
             turn = 2;
         } else if (turn == 2 && !undoForPlayer1) {//undo for player1
             if (checkHasOneBead()) {
-                formatter.format("%s\n","Invalid undo");
-                formatter.flush();
+               // formatter.format("%s\n","Invalid undo");
+                //formatter.flush();
                 showTheGame();
                 return;
             }

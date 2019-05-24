@@ -20,38 +20,22 @@ import java.util.*;
 
 
 public class Client extends Application {
-    static final Object lock = new Object();//for getInput from server
-    static final Object lockForStartGame = new Object();
-    static final Object lockForCounter = new Object();
-    static boolean endOfClient = false;
-    // private static Scanner scannerInput = new Scanner(System.in);
-    private static boolean updateTable = false;
+    private static boolean endOfClient = false;
     private static Table table;
     static boolean gameStart = false;
     private static Cell[][] cells;
     private static Formatter formatter;
-    static int counterForUpdate = 0;
     private static String userName;
     static boolean endGame = false;
     private static Scanner inputFromServer;
-    private char[][] tables;
+    private static char[][] tables;
     static String serverAnswer;
-    static boolean enteredUserName = false;
-
-
-//    static void setGameStart(boolean gameStart) {
-//        synchronized (lockForStartGame) {
-//            Client.gameStart = gameStart;
-//        }
-//    }
-
-//    static void setUpdateTable(boolean gameStart) {
-//        synchronized (lock) {
-//            Client.updateTable = gameStart;
-//        }
-//    }
+    private static boolean enteredUserName = false;
 
     private static void updateTableF() {
+        Gson gson = new Gson();
+        table = gson.fromJson(serverAnswer, Table.class);
+        tables = table.gameTable;
         for (int i = 0; i < table.getN(); i++) {
             for (int j = 0; j < table.getM(); j++) {
                 cells[i][j].setText(table.gameTable[i][2 * j] + "");
@@ -146,7 +130,6 @@ public class Client extends Application {
             while (true) {
                 try {
                     formatter.flush();
-                    // System.out.println(serverAnswer);
                     if (serverAnswer != null) {
                         Gson gson = new Gson();
                         ArrayList<String> strings = gson.fromJson(serverAnswer, new TypeToken<List<String>>() {
@@ -157,7 +140,7 @@ public class Client extends Application {
                         break;
                     }
                 } catch (Exception e) {
-                    System.out.println(e);
+                    e.printStackTrace();
                 }
             }
         });
@@ -224,9 +207,75 @@ public class Client extends Application {
                     primaryStage.setScene(gameScene);
                     serverAnswer = null;
                 }
+                if(endGame){
+                    primaryStage.setScene(menuScene);
+                    endGame = false;
+                    serverAnswer = null;
+                }
             }
+
+
         };
         animationTimer.start();
+
+        makeButton("UNDO", 170, 710, gameRoot).setOnMouseClicked(event -> {
+            formatter.format("%s\n","undo");
+            formatter.flush();
+            while (true){
+                if(serverAnswer !=null){
+                    updateTableF();
+                    serverAnswer = null;
+                    break;
+                }
+            }
+
+        });
+        makeButton("PAUSE", 380, 710, gameRoot).setOnMouseClicked(event -> {
+            formatter.format("%s\n","pause");
+            formatter.flush();
+        });
+        makeButton("STOP", 590, 710, gameRoot).setOnMouseClicked(event -> {
+           formatter.format("%s\n","stop");
+           formatter.flush();
+
+        });
+
+        GridPane grid = new GridPane();
+        final Label label = new Label();
+        label.setTextFill(Color.BLACK);
+        GridPane.setConstraints(label, 0, 3);
+        GridPane.setColumnSpan(label, 2);
+        grid.getChildren().add(label);
+        grid.setPadding(new Insets(10, 10, 10, 10));
+        grid.setVgap(5);
+        grid.setHgap(5);
+        grid.relocate(2, 750);
+//Defining the Name text field
+        final TextField order = new TextField();
+        order.setPromptText("put (x,y)");
+        order.setPrefColumnCount(10);
+        GridPane.setConstraints(order, 0, 0);
+        grid.getChildren().add(order);
+
+        gameRoot.getChildren().add(grid);
+        Button button = new Button("Enter");
+        GridPane.setConstraints(button, 1, 0);
+        grid.getChildren().add(button);
+        button.setOnAction(event -> {
+            if (name.getText().trim().equals("")) {
+                label.setText("You have not enter username");
+            } else {
+                while (true){
+                    if(serverAnswer !=null){
+                        updateTableF();
+                        serverAnswer = null;
+                        break;
+                    }
+                }
+            }
+
+        });
+
 
         primaryStage.setScene(getUserNameScene);
         primaryStage.show();

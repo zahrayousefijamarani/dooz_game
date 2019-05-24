@@ -69,8 +69,8 @@ public class ThreadForClient extends Thread {
 
                     if (me.getState().equals("game") && !line.equals("undo")) {
                         if (!canPlay(menu, me)) {
-                            formatter.format("%s\n", "is not your turn");
-                            formatter.flush();
+                            //formatter.format("%s\n", "is not your turn");
+                            //formatter.flush();
                             continue;
                         }
                     }

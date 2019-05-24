@@ -72,7 +72,7 @@ public class DoozMain {
             case "game":
                 if (putMatcher.find() ) {
                     if (putMatcher.group(3) != null) {
-                        formatter.format("%s\n","Invalid command for put");
+                       // formatter.format("%s\n","Invalid command for put");
                         formatter.flush();
                         menuOfTheGame.presentGame().showTheGame();
                         return state;
