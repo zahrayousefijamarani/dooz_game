@@ -131,7 +131,7 @@ public class Client extends Application {
             formatter.flush();
             while (true) {
                 try {
-                    formatter.flush();
+                   formatter.flush();
                     if (serverAnswer != null) {
                         Gson gson = new Gson();
                         ArrayList<String> strings = gson.fromJson(serverAnswer, new TypeToken<List<String>>() {
@@ -291,7 +291,7 @@ public class Client extends Application {
         commentLabel.setTextFill(Color.BLACK);
         commentLabel.setFont(Font.font(20));
 
-
+        primaryStage.setOnCloseRequest(event -> System.exit(0));
         primaryStage.setScene(getUserNameScene);
         primaryStage.show();
 
